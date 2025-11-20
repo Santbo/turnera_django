@@ -1,0 +1,92 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="{% static "img/favicon.ico" %}" type="image/x-icon">
+  <title>{% block titulo %} {% endblock %} - Turnate</title>
+  {%block css%} {%endblock%}
+  {%block js%} {%endblock%}
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+
+  </style>
+</head>
+<body>
+  
+  <div class="min-h-screen pt-20 md:pt-24 pb-10">
+    {% block contenido %} {%endblock%}
+  </div>
+
+  <footer class="bg-slate-900 text-slate-300">
+      <div class="h-[2px] w-full bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400"> </div>
+
+      <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-10 py-10">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-8">
+          <div>
+            <a href={%url "base:index" %} class="flex items-center gap-3">
+                      <img
+                        src={% static "img/logo.svg" %}
+                        alt="Turnate"
+                        class="h-11 w-auto select-none"
+                        />
+                      <span class="font-extrabold text-2xl text-white tracking-tight">Turnate</span>
+                    </a>
+
+            <p class="mt-2 text-sm text-slate-400">
+              Agenda online sencilla para emprendedores y clientes.
+            </p>
+          </div>
+
+          <nav aria-label="Navegación" class="sm:ml-4">
+            <h3 class="text-white font-semibold">Navegación</h3>
+            <ul class="mt-2 space-y-1.5 text-sm">
+              <li><a href="{%url "base:index" %}" class="hover:text-white">Inicio</a></li>
+              <li><a href="{%url "base:nosotros" %}" class="hover:text-white">Nosotros</a></li>
+            </ul>
+          </nav>
+
+          <div>
+            <h3 class="text-white font-semibold">Legal</h3>
+            <ul class="mt-2 space-y-1.5 text-sm">
+              <li><a href="{%url "base:terminos" %}" class="hover:text-white">Términos y Condiciones</a></li>
+              <li><a href="{% url "base:privacidad" %}" class="hover:text-white">Política de Privacidad</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 class="text-white font-semibold">Contacto</h3>
+            <ul class="mt-2 space-y-1.5 text-sm">
+              <li>
+                <a
+                  href="mailto:contacto@turnate.com"
+                  class="hover:text-white"
+                >
+                  contacto@turnate.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://wa.me/543644609497"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="hover:text-white"
+                >
+                  WhatsApp: +54 3644 609497
+                </a>
+                <span class="ml-1 text-slate-500">Turnate</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-8 border-t border-slate-800/70 pt-4 text-center text-xs text-slate-500">
+          © {% now 'Y' %} Turnate. Todos los derechos reservados.
+        </div>
+      </div>
+    </footer>
+</body>
+</html>
