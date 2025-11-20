@@ -1,0 +1,221 @@
+{% extends "_base.html" %}
+
+{% block contenido%}
+
+<div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="bg-white rounded-3xl shadow-xl p-8">
+
+        <!-- Título -->
+        <div class="mb-4">
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Perfil</h2>
+            <p class="text-sm text-slate-600">Completá los datos de tu cuenta.</p>
+        </div>
+
+        <!-- Mensaje general -->
+        {% if msg %}
+        <div class="mb-4 rounded-xl px-4 py-2 text-sm ring-1
+            {% if 'error' in msg or 'incorrect' in msg %}
+                bg-red-50 text-red-700 ring-red-200
+            {% else %}
+                bg-emerald-50 text-emerald-700 ring-emerald-200
+            {% endif %}
+        ">
+            {{ msg }}
+        </div>
+        {% endif %}
+
+        <!-- FORMULARIO PERFIL -->
+        <form method="post" enctype="multipart/form-data" class="grid grid-cols-1 gap-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6 items-start">
+
+                <!-- ===== AVATAR ===== -->
+                <div class="flex flex-col items-start gap-3">
+
+                    <!-- Cuadro avatar -->
+                    <div class="h-[92px] w-[92px] rounded-full overflow-hidden border border-slate-200 bg-slate-50 grid place-items-center text-slate-400">
+                        {% if avatar_url %}
+                            <img src="{{ avatar_url }}" alt="avatar" class="h-full w-full object-cover">
+                        {% else %}
+                            <span class="text-xs">Sin foto</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex items-center gap-2">
+                        <input
+                            id="avatar"
+                            type="file"
+                            name="avatar"
+                            accept="image/*"
+                            class="hidden"
+                        />
+
+                        <label for="avatar"
+                            class="cursor-pointer rounded-lg bg-blue-600 text-white px-3 py-2 text-sm hover:bg-blue-700 transition">
+                            Seleccionar foto
+                        </label>
+
+                        <button type="submit" name="guardar_avatar"
+                            class="rounded-lg bg-green-600 text-white px-3 py-2 text-sm hover:bg-green-700 transition">
+                            Guardar foto
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- ===== CAMPOS DEL PERFIL ===== -->
+                <div class="grid gap-4">
+
+                    <!-- EMAIL -->
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-slate-700">
+                            Correo electrónico
+                        </label>
+                        <input
+                            type="email"
+                            name="email"
+                            value="{{ form.email.value }}"
+                            required
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                        />
+                    </div>
+
+                    <!-- Nombre y Apellido -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-slate-700">Nombre</label>
+                            <input
+                                type="text"
+                                name="first_name"
+                                value="{{ form.first_name.value }}"
+                                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                            />
+                        </div>
+
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-slate-700">Apellido</label>
+                            <input
+                                type="text"
+                                name="last_name"
+                                value="{{ form.last_name.value }}"
+                                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- telefono -->
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-slate-700">Telefono</label>
+                        <input
+                            type="text"
+                            name="telefono"
+                            value="{{ form.telefono.value }}"
+                            class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                        />
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Botón Guardar -->
+            <div>
+                <button
+                    type="submit"
+                    name="guardar_perfil"
+                    class="rounded-xl bg-blue-600 text-white font-semibold px-6 py-3 shadow hover:bg-blue-700 transition">
+                    Guardar cambios
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- ====================================================== -->
+<!-- ===== BLOQUE SEGURIDAD ===== -->
+<div class="max-w-4xl mx-auto px-4 pb-16">
+    <div class="bg-white rounded-3xl shadow-xl p-8">
+
+        <!-- Botón acordeón -->
+        <button
+            type="button"
+            onclick="document.getElementById('seguridad-block').classList.toggle('hidden')"
+            class="w-full flex items-center justify-between gap-3"
+        >
+            <div>
+                <h2 class="text-xl font-bold text-slate-900">Seguridad</h2>
+                <p class="text-sm text-slate-600">Actualizá tu contraseña.</p>
+            </div>
+            <span class="text-slate-500 text-xl">+</span>
+        </button>
+
+        <!-- Contenido Seguridad -->
+        <div id="seguridad-block" class="hidden mt-4">
+
+            {% if sec_msg %}
+            <div class="mb-4 rounded-xl px-4 py-2 text-sm ring-1
+                {% if 'error' in sec_msg %}
+                    bg-red-50 text-red-700 ring-red-200
+                {% else %}
+                    bg-emerald-50 text-emerald-700 ring-emerald-200
+                {% endif %}
+            ">
+                {{ sec_msg }}
+            </div>
+            {% endif %}
+
+            <form method="post" class="grid gap-4">
+                {% csrf_token %}
+                <input type="hidden" name="cambiar_password" value="1">
+
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-slate-700">Contraseña actual</label>
+                    <input
+                        type="password"
+                        name="actual"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                    />
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-slate-700">Nueva contraseña</label>
+                    <input
+                        type="password"
+                        name="nueva"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                    />
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-slate-700">Confirmar contraseña</label>
+                    <input
+                        type="password"
+                        name="confirmar"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                    />
+                </div>
+
+                <ul class="text-xs text-slate-600 space-y-1">
+                    <li>• Al menos 8 caracteres.</li>
+                    <li>• Recomendado: letras, números y símbolos.</li>
+                </ul>
+
+                <button
+                    type="submit"
+                    class="rounded-xl bg-blue-600 text-white font-semibold px-6 py-3 shadow hover:bg-blue-700 transition">
+                    Actualizar contraseña
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+</body>
+{% endblock%}

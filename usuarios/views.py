@@ -1,8 +1,10 @@
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.auth.views import LoginView
-from .forms import RegistroUsuarioForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .forms import RegistroUsuarioForm, PerfilUsuarioForm
+from .models import Usuario
 
 class RegistroUsuarioView(CreateView):
     template_name = "registro.html"
@@ -19,3 +21,11 @@ class LoginUsuarioView(LoginView):
             return reverse_lazy("admin:index")
         return reverse_lazy("base:index") 
     
+class PerfilUsuarioView(LoginRequiredMixin, UpdateView):
+    model = Usuario
+    form_class = PerfilUsuarioForm
+    template_name = "perfil.html"
+    success_url = reverse_lazy("usuarios:perfil")
+
+    def get_object(self):
+        return self.request.user
