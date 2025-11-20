@@ -1,37 +1,44 @@
+{% extends "_base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-</head>
+{% block titulo%} Registro {%endblock%}
 
-<body class="min-h-screen w-full bg-gradient-to-b from-blue-600 to-cyan-400 grid place-items-center px-4 py-8">
+{% block css %} 
+<style type="text/tailwindcss">
+  [id^="lnk"] {
+    @apply px-5 py-2.5 rounded-full text-base font-medium transition-colors duration-150 text-white/90 hover:text-white bg-white/0 hover:bg-white/10;
+  }
 
-    <div class="w-3/4 max-w-4xl">
-        <div class="rounded-3xl p-[1px] bg-gradient-to-br from-blue-700 via-blue-600 to-cyan-400 shadow-2xl">
-            <div class="rounded-3xl bg-white/90 backdrop-blur-md mt-16">
+  #lnkRegistro {
+    @apply px-5 py-2.5 rounded-full text-base font-medium transition-colors duration-150 bg-white text-blue-700 shadow;
+  }
+</style>
+{% endblock %}
+
+{% block contenido %}
+
+    <div class="w-full h-full py-8 bg-slate-100">
+            <div class="rounded-3xl bg-white/90 backdrop-blur-md max-w-2/3 mx-auto rounded shadow">
                 <div class="grid grid-cols-1 md:grid-cols-2">
 
-                    <!-- Imagen lateral -->
-                    <div class="relative min-h-[260px] md:min-h-[560px]">
-                        <img src="{% static 'img/imgregistro.jpg' %}"
-                             alt="Turnos"
-                             class="absolute inset-0 h-full w-full object-cover"
-                             draggable="false"
-                        />
-                        <div class="absolute inset-0 bg-gradient-to-tr from-sky-700/60 via-sky-600/40 to-cyan-500/30 mix-blend-multiply"></div>
-                        <div class="relative h-full flex items-end md:items-center">
-                            <div class="p-6 md:p-10 text-white drop-shadow">
-                                <h2 class="text-xl md:text-2xl font-semibold leading-tight">
-                                    Sumate y administrá tus turnos
-                                </h2>
-                            </div>
+                <!-- Imagen lateral -->
+                <div class="relative min-h-[260px] md:min-h-[560px] rounded-l-3xl overflow-hidden">
+                    <img src="{% static 'img/imgregistro.jpg' %}"
+                        alt="Turnos"
+                        class="absolute inset-0 h-full w-full object-cover"
+                        draggable="false"
+                    />
+
+                    <div class="absolute inset-0 bg-gradient-to-tr from-sky-700/60 via-sky-600/40 to-cyan-500/30 mix-blend-multiply"></div>
+
+                    <div class="relative h-full flex items-end md:items-center">
+                        <div class="p-6 md:p-10 text-white drop-shadow">
+                            <h2 class="text-xl md:text-2xl font-semibold leading-tight">
+                                Sumate y administrá tus turnos
+                            </h2>
                         </div>
                     </div>
+                </div>
 
                     <!-- Formulario -->
                     <div class="p-6 md:p-10">
@@ -47,7 +54,7 @@
 
                             <p class="mt-1 text-sm text-slate-600">
                                 ¿Ya tenés cuenta?
-                                <a href="{% url 'login' %}" class="font-medium text-blue-600 hover:text-blue-700">
+                                <a href="{% url 'usuarios:login' %}" class="font-medium text-blue-600 hover:text-blue-700">
                                     Iniciar sesión
                                 </a>
                             </p>
@@ -152,7 +159,6 @@
                                     type="text" 
                                     name="telefono"
                                     placeholder="Ej: 3644556677"
-                                    required
                                     class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 
                                            text-slate-900 outline-none focus:ring-2 focus:ring-blue-300"
                                     value="{{ request.POST.telefono}}"
@@ -178,23 +184,20 @@
                                 type="submit"
                                 class="mt-2 w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-400 
                                        px-4 py-3 text-white font-semibold shadow 
-                                       hover:scale-[1.01] active:scale-[0.99] transition">
+                                       hover:cursor-pointer">
                                 Crear cuenta
                             </button>
 
                             <p class="text-[11px] text-slate-500 mt-1">
                                 Al registrarte aceptás nuestros
-                                <a href="#" class="text-blue-600 hover:text-blue-700">Términos y Condiciones</a> y la
-                                <a href="#" class="text-blue-600 hover:text-blue-700">Política de Privacidad</a>.
+                                <a href="{% url "base:terminos" %}" class="text-blue-600 hover:text-blue-700">Términos y Condiciones</a> y la
+                                <a href="{% url "base:privacidad" %}" class="text-blue-600 hover:text-blue-700">Política de Privacidad</a>.
                             </p>
                         </form>
 
                     </div>
 
                 </div>
-            </div>
         </div>
     </div>
-
-</body>
-</html>
+{% endblock %}

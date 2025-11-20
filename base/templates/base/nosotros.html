@@ -3,6 +3,18 @@
 
 {% block titulo%} Nosotros {%endblock%}
 
+{% block css %} 
+<style type="text/tailwindcss">
+  [id^="lnk"] {
+    @apply px-5 py-2.5 rounded-full text-base font-medium transition-colors duration-150 text-white/90 hover:text-white bg-white/0 hover:bg-white/10;
+  }
+
+  #lnkNosotros {
+    @apply px-5 py-2.5 rounded-full text-base font-medium transition-colors duration-150 bg-white text-blue-700 shadow;
+  }
+</style>
+{% endblock %}
+
 {% block contenido %}
 <main >
   <section class="relative isolate overflow-hidden">
@@ -41,8 +53,7 @@
 
               <div class="mt-6 flex flex-wrap gap-3">
                 <a 
-                {% comment %} #TODO: Poner la url del registro  {% endcomment %}
-                href="" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" aria-label="Crear mi cuenta">
+                href="{% url "usuarios:registro" %}" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" aria-label="Crear mi cuenta">
                   Crear mi cuenta
                 </a>
               </div>
@@ -307,8 +318,7 @@
       </p>
       <div class="mt-4 flex flex-wrap gap-3">
         <a
-          {% comment %} #TODO: Agregar url de registro {% endcomment %}
-          href=""
+          href="{% url "usuarios:registro" %}"
           class="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-100"
         >
           Crear mi cuenta

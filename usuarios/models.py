@@ -13,8 +13,13 @@ class Usuario (AbstractUser):
 
     @property
     def inicial_nombre(self):
+        if len(self.first_name):
+            return self.first_name[0]
+        return "U"
         
-        return self.first_name[0]
+    @property
+    def nombre_completo(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class Emprendimiento (models.Model):

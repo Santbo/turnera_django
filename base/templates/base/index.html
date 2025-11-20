@@ -32,15 +32,13 @@
 
             <div class="mt-8 flex flex-wrap gap-3">
               <a
-              {% comment %} #TODO: Agregar la url de registro {% endcomment %}
-                href=""
+                href="{% url "usuarios:registro" %}"
                 class="rounded-xl bg-gradient-to-r from-sky-700 to-indigo-600 px-6 py-3 text-white font-semibold shadow-lg ring-1 ring-blue-300/40"
               >
                 Crear cuenta gratis
               </a>
               <a
-              {% comment %} #TODO: Agregar la url de login {% endcomment %}
-                href=""
+                href="{% url "usuarios:login" %}"
                 class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-slate-800 font-semibold shadow hover:bg-slate-50"
               >
                 Iniciar sesión
@@ -216,8 +214,7 @@
 
           <div class="mt-6 text-center">
             <a
-            {% comment %} #TODO: poner la url de registro  {% endcomment %}
-              href=""
+              href=" {% url "usuarios:registro" %}"
               class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-sky-700 to-indigo-600 px-6 py-3 text-white font-semibold shadow-lg ring-1 ring-blue-300/40"
             >
               Probar gratis
@@ -237,15 +234,13 @@
             </div>
             <div class="flex gap-3 justify-center">
               <a
-              {% comment %} #TODO: Poner la url de login {% endcomment %}
-                href=""
+                href="{% url "usuarios:login" %}"
                 class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-slate-800 font-semibold shadow hover:bg-slate-50"
               >
                 Iniciar sesión
               </a>
               <a
-              {% comment %} #TODO : Poner la url de registro {% endcomment %}
-                href=""
+                href="{% url "usuarios:registro" %}"
                 class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-sky-700 to-indigo-600 px-5 py-3 text-white font-semibold shadow-lg ring-1 ring-blue-300/40"
               >
                 Crear cuenta

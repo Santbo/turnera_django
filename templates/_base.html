@@ -39,15 +39,14 @@
         <a id="lnkIndex" href="{% url 'base:index' %}" >Inicio</a>
         <a id="lnkNosotros" href="{% url 'base:nosotros' %}" >Nosotros</a>
 
-        {% if user.is_authenticated and user.is_admin %}
+        {% if user.is_authenticated and user.is_staff %}
         {% comment %} #TODO: Poner url de reportes del admin {% endcomment %}
           <a id="lnkReportes" href="" >Reportes</a>
         {% endif %}
 
         {% if not user.is_authenticated %}
-        {% comment %} #TODO: Poner url del login y del registro {% endcomment %}
-          <a id="lnkLogin" href="" >Iniciar sesión</a>
-          <a id="lnkRegistro" href="" >Registrarse</a>
+          <a id="lnkLogin" href="{% url "usuarios:login" %}" >Iniciar sesión</a>
+          <a id="lnkRegistro" href="{% url "usuarios:registro" %}" >Registrarse</a>
 
         {% else %}
           <details class="relative ml-2 group">
@@ -72,10 +71,12 @@
                     {{ user.inicial_nombre }}
                   </div>
 
+                  <span class="truncate max-w-24"> {{ user.nombre_completo }} </span>
+
                   <div class="min-w-0">
                     <p class="text-sm font-medium text-slate-900 truncate">{{ user.display_name }}</p>
 
-                    {% if user.is_admin %}
+                    {% if user.is_staff %}
                       <span class="inline-flex items-center gap-1 text-[11px] px-2 py-[2px] rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">
                         Administrador
                       </span>
@@ -132,11 +133,10 @@
                 <li class="my-1 border-t"></li>
 
                 <li>
-                  {% comment %} #TODO: Poner url de logout {% endcomment %}
-                  <form action="" method="post">
+                  <form action="{%url "usuarios:logout" %}" method="post">
                     {% csrf_token %}
                     <button
-                      class="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-left text-rose-600"
+                      class="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-left text-rose-600 hover:cursor-pointer"
                       type="submit"
                     >
                       <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -158,7 +158,7 @@
   </header>
 
 
-  <div class="min-h-screen pt-20 md:pt-24 pb-10">
+  <div class="min-h-screen mt-24">
     {% block contenido %} {%endblock%}
   </div>
 
