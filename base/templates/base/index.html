@@ -1,0 +1,258 @@
+{% extends "_base.html" %}
+{% load static %}
+
+{% block titulo%} Inicio {%endblock%}
+
+{% block css %} 
+<style type="text/tailwindcss">
+  [id^="lnk"] {
+    @apply px-5 py-2.5 rounded-full text-base font-medium transition-colors duration-150 text-white/90 hover:text-white bg-white/0 hover:bg-white/10;
+  }
+
+  #lnkIndex {
+    @apply px-5 py-2.5 rounded-full text-base font-medium transition-colors duration-150 bg-white text-blue-700 shadow;
+  }
+</style>
+{% endblock %}
+
+{% block contenido %}
+
+<main >
+      <div class="mx-auto w-11/12 max-w-7xl space-y-12">
+        {% comment %} Hero {% endcomment %}
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          <div class="order-2 lg:order-1 lg:pr-8">
+            <h1 class="mt-3 text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              Sacá tu turno en <span class="bg-gradient-to-r from-sky-700 to-indigo-600 bg-clip-text text-transparent">segundos</span>.
+            </h1>
+            <p class="mt-4 text-lg md:text-xl text-slate-700">
+              Elegís servicio, día y horario disponible. <span class="font-semibold">Confirmación inmediata</span> para el cliente,
+              <span class="font-semibold"> agenda ordenada</span> para el emprendedor.
+            </p>
+
+            <div class="mt-8 flex flex-wrap gap-3">
+              <a
+              {% comment %} #TODO: Agregar la url de registro {% endcomment %}
+                href=""
+                class="rounded-xl bg-gradient-to-r from-sky-700 to-indigo-600 px-6 py-3 text-white font-semibold shadow-lg ring-1 ring-blue-300/40"
+              >
+                Crear cuenta gratis
+              </a>
+              <a
+              {% comment %} #TODO: Agregar la url de login {% endcomment %}
+                href=""
+                class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-6 py-3 text-slate-800 font-semibold shadow hover:bg-slate-50"
+              >
+                Iniciar sesión
+              </a>
+            </div>
+
+            {% comment %} Checks {% endcomment %}
+            <ul class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-700">
+
+              <li class="inline-flex items-center gap-2">
+                <i class="text-emerald-600 fa-solid fa-check"></i>
+                <span>Proceso simple, sin pasos confusos</span>
+              </li>
+
+              <li class="inline-flex items-center gap-2">
+                <i class="text-emerald-600 fa-solid fa-check"></i>
+                <span>Horarios disponibles en tiempo real</span>
+              </li>
+
+              <li class="inline-flex items-center gap-2">
+                <i class="text-emerald-600 fa-solid fa-check"></i>
+                <span>Confirmación elegante y al instante</span>
+              </li>
+
+              <li class="inline-flex items-center gap-2">
+                <i class="text-emerald-600 fa-solid fa-check"></i>
+                <span>Sin turnos solapados por servicio</span>
+              </li>
+
+            </ul>
+          </div>
+
+          <div class="order-1 lg:order-2 mt-4">
+            <div class="relative max-w-[560px] mx-auto">
+              <img
+                class="rounded-2xl object-cover w-full h-auto max-h-[420px] shadow-xl"
+                src={% static "img/IMGHome.png" %}
+                alt="Turnos claros para clientes y agenda ordenada para emprendedores"
+              />
+              <div class="pointer-events-none absolute -inset-4 rounded-[28px] bg-sky-500/10 blur-2xl" aria-hidden="true" />
+            </div>
+          </div>
+        </section>
+
+        {% comment %} TrustBar {% endcomment %}
+        <section class="rounded-2xl border border-slate-200 bg-white p-4 md:p-5 shadow-sm">
+          <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+
+            <!-- Item 1 -->
+            <div class="inline-flex items-center gap-2">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                <i class="fa-solid fa-star h-4 w-4"></i>
+              </span>
+              <p class="text-sm text-slate-700">
+                <span class="font-semibold">Clientes felices</span>: experiencia de reserva clara y rápida.
+              </p>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="inline-flex items-center gap-2">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-sky-100 text-sky-700">
+                <i class="fa-solid fa-shield-halved h-4 w-4"></i>
+              </span>
+              <p class="text-sm text-slate-700">
+                <span class="font-semibold">Negocios ordenados</span>: menos chat, sin solapados, agenda al día.
+              </p>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="inline-flex items-center gap-2">
+              <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-700">
+                <i class="fa-solid fa-chart-line h-4 w-4"></i>
+              </span>
+              <p class="text-sm text-slate-700">
+                <span class="font-semibold">Decisiones con datos</span>: servicios más usados y horarios pico.
+              </p>
+            </div>
+
+          </div>
+        </section>
+
+        {% comment %} Cards {% endcomment %}
+        <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-b from-sky-50 to-indigo-50 text-sky-700 ring-1 ring-slate-200">
+              <i class="text-xl fa-solid fa-bolt"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-slate-900">Rápido y claro</h3>
+            <p class="mt-1 text-slate-600">El cliente entiende el paso a paso en segundos.</p>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-b from-sky-50 to-indigo-50 text-sky-700 ring-1 ring-slate-200">
+              <i class="text-xl fa-solid fa-calendar"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-slate-900">Calendario intuitivo</h3>
+            <p class="mt-1 text-slate-600">Día, semana o mes. Todo sin choques de horario.</p>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-b from-sky-50 to-indigo-50 text-sky-700 ring-1 ring-slate-200">
+              <i class="text-xl fa-solid fa-clock"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-slate-900">Servicios con duración</h3>
+            <p class="mt-1 text-slate-600">Bloques y duración por servicio para evitar solapados.</p>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-b from-sky-50 to-indigo-50 text-sky-700 ring-1 ring-slate-200">
+              <i class="text-xl fa-solid fa-link"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-slate-900">Link público</h3>
+            <p class="mt-1 text-slate-600">Compartí tu código y recibí reservas sin atender el chat.</p>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-b from-sky-50 to-indigo-50 text-sky-700 ring-1 ring-slate-200">
+              <i class="text-xl fa-solid fa-shield-halved"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-slate-900">Política de uso responsable</h3>
+            <p class="mt-1 text-slate-600">Solo se permite una reserva activa por cliente y servicio para garantizar un funcionamiento ordenado y justo.</p>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-b from-sky-50 to-indigo-50 text-sky-700 ring-1 ring-slate-200">
+              <i class="text-xl fa-solid fa-chart-line"></i>
+            </div>
+            <h3 class="mt-4 text-lg font-semibold text-slate-900">Control del negocio</h3>
+            <p class="mt-1 text-slate-600">Agenda del día y métricas para decidir con datos.</p>
+          </div>
+
+        </section>
+
+        {% comment %} Pasos {% endcomment %}
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Step 1 -->
+            <div class="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="absolute -top-3 left-4 inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-b from-sky-700 to-indigo-600 text-white text-sm font-bold shadow">
+                1
+              </div>
+              <div class="mt-3">
+                <h4 class="text-base font-semibold text-slate-900">Elegí tu servicio</h4>
+                <p class="mt-1 text-sm text-slate-600">Cartas claras, duración y precio visibles.</p>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="absolute -top-3 left-4 inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-b from-sky-700 to-indigo-600 text-white text-sm font-bold shadow">
+                2
+              </div>
+              <div class="mt-3">
+                <h4 class="text-base font-semibold text-slate-900">Seleccioná día y horario</h4>
+                <p class="mt-1 text-sm text-slate-600">Solo turnos disponibles. Sin confusiones.</p>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="absolute -top-3 left-4 inline-flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-b from-sky-700 to-indigo-600 text-white text-sm font-bold shadow">
+                3
+              </div>
+              <div class="mt-3">
+                <h4 class="text-base font-semibold text-slate-900">Confirmación al instante</h4>
+                <p class="mt-1 text-sm text-slate-600">Mensaje premium y email de confirmación.</p>
+              </div>
+            </div>
+
+          </div>
+
+
+          <div class="mt-6 text-center">
+            <a
+            {% comment %} #TODO: poner la url de registro  {% endcomment %}
+              href=""
+              class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-sky-700 to-indigo-600 px-6 py-3 text-white font-semibold shadow-lg ring-1 ring-blue-300/40"
+            >
+              Probar gratis
+            </a>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="text-center md:text-left">
+              <h2 class="text-xl md:text-2xl font-semibold text-slate-900">
+                Empezá hoy. Que tus clientes reserven sin fricción.
+              </h2>
+              <p class="mt-1 text-sm text-slate-600">
+                Cuando la experiencia es clara, tu agenda se llena sola.
+              </p>
+            </div>
+            <div class="flex gap-3 justify-center">
+              <a
+              {% comment %} #TODO: Poner la url de login {% endcomment %}
+                href=""
+                class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-slate-800 font-semibold shadow hover:bg-slate-50"
+              >
+                Iniciar sesión
+              </a>
+              <a
+              {% comment %} #TODO : Poner la url de registro {% endcomment %}
+                href=""
+                class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-sky-700 to-indigo-600 px-5 py-3 text-white font-semibold shadow-lg ring-1 ring-blue-300/40"
+              >
+                Crear cuenta
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+{% endblock contenido %}
