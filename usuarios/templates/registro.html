@@ -1,0 +1,200 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="min-h-screen w-full bg-gradient-to-b from-blue-600 to-cyan-400 grid place-items-center px-4 py-8">
+
+    <div class="w-3/4 max-w-4xl">
+        <div class="rounded-3xl p-[1px] bg-gradient-to-br from-blue-700 via-blue-600 to-cyan-400 shadow-2xl">
+            <div class="rounded-3xl bg-white/90 backdrop-blur-md mt-16">
+                <div class="grid grid-cols-1 md:grid-cols-2">
+
+                    <!-- Imagen lateral -->
+                    <div class="relative min-h-[260px] md:min-h-[560px]">
+                        <img src="{% static 'img/imgregistro.jpg' %}"
+                             alt="Turnos"
+                             class="absolute inset-0 h-full w-full object-cover"
+                             draggable="false"
+                        />
+                        <div class="absolute inset-0 bg-gradient-to-tr from-sky-700/60 via-sky-600/40 to-cyan-500/30 mix-blend-multiply"></div>
+                        <div class="relative h-full flex items-end md:items-center">
+                            <div class="p-6 md:p-10 text-white drop-shadow">
+                                <h2 class="text-xl md:text-2xl font-semibold leading-tight">
+                                    Sumate y administrá tus turnos
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulario -->
+                    <div class="p-6 md:p-10">
+
+                        <header class="mb-6">
+                            <div class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-400 px-3 py-1 text-xs font-medium text-white">
+                                Nuevo usuario
+                            </div>
+
+                            <h1 class="mt-3 text-2xl md:text-3xl font-semibold text-slate-900">
+                                Crear una cuenta
+                            </h1>
+
+                            <p class="mt-1 text-sm text-slate-600">
+                                ¿Ya tenés cuenta?
+                                <a href="{% url 'login' %}" class="font-medium text-blue-600 hover:text-blue-700">
+                                    Iniciar sesión
+                                </a>
+                            </p>
+                        </header>
+
+
+                        <form method="post" class="grid gap-4">
+                            {% csrf_token %}
+
+                            <!-- Nombre y apellido -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nombre</label>
+                                    <input 
+                                        type="text" 
+                                        name="first_name"
+                                        placeholder="Nombre"
+                                        required
+                                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 
+                                               text-slate-900 outline-none focus:ring-2 focus:ring-blue-300"
+                                        value="{{ request.POST.first_name}}"
+                                    >
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Apellido</label>
+                                    <input 
+                                        type="text" 
+                                        name="last_name"
+                                        placeholder="Apellido"
+                                        required
+                                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 
+                                               text-slate-900 outline-none focus:ring-2 focus:ring-blue-300"
+                                        value="{{ request.POST.last_name}}"
+                                    >
+                                </div>
+
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Correo electrónico</label>
+                                <input 
+                                    type="email" 
+                                    name="email"
+                                    placeholder="tu@email.com"
+                                    required
+                                    class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 
+                                           text-slate-900 outline-none focus:ring-2 focus:ring-blue-300"
+                                    value="{{ request.POST.email}}"
+                                >
+                            </div>
+
+                            <!-- Usuario -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Usuario</label>
+                                <input 
+                                    type="text" 
+                                    name="username"
+                                    placeholder="Usuario"
+                                    required
+                                    class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 
+                                           text-slate-900 outline-none focus:ring-2 focus:ring-blue-300"
+                                    value="{{ request.POST.username}}"
+                                >
+                            </div>
+
+                            <!-- Contraseña -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Contraseña</label>
+                                <input 
+                                    type="password" 
+                                    name="password1"
+                                    placeholder="••••••••"
+                                    required
+                                    class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 
+                                           text-slate-900 outline-none focus:ring-2 focus:ring-blue-300"
+                                >
+                            </div>
+
+                            <!-- Repetir contraseña -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Repetir contraseña</label>
+                                <input 
+                                    type="password" 
+                                    name="password2"
+                                    placeholder="••••••••"
+                                    required
+                                    class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 
+                                           text-slate-900 outline-none focus:ring-2 focus:ring-blue-300"
+                                >
+                            </div>
+
+                            <!-- Teléfono -->
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">
+                                    
+                                    Teléfono <span class="text-xs font-medium text-gray-500 mb-1 "> (Opcional) </span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    name="telefono"
+                                    placeholder="Ej: 3644556677"
+                                    required
+                                    class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 
+                                           text-slate-900 outline-none focus:ring-2 focus:ring-blue-300"
+                                    value="{{ request.POST.telefono}}"
+                                >
+                            </div>
+                        {% if form.errors %}
+                        <div class="mb-4 rounded-xl bg-red-50 text-red-700 text-sm px-4 py-2 ring-1 ring-red-200">
+                            {% for field, errors in form.errors.items %}
+                                <ul>
+                                    {%for error in errors%}
+                                        
+                                        <li>
+                                            {{ error }}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% endfor %}
+
+                        </div>
+                        {% endif %}
+                            <!-- Botón -->
+                            <button
+                                type="submit"
+                                class="mt-2 w-full rounded-xl bg-gradient-to-r from-blue-600 to-cyan-400 
+                                       px-4 py-3 text-white font-semibold shadow 
+                                       hover:scale-[1.01] active:scale-[0.99] transition">
+                                Crear cuenta
+                            </button>
+
+                            <p class="text-[11px] text-slate-500 mt-1">
+                                Al registrarte aceptás nuestros
+                                <a href="#" class="text-blue-600 hover:text-blue-700">Términos y Condiciones</a> y la
+                                <a href="#" class="text-blue-600 hover:text-blue-700">Política de Privacidad</a>.
+                            </p>
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

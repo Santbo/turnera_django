@@ -1,0 +1,98 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body>
+
+<div class="relative pt-24">
+  <!-- Fondo degradado -->
+  <div class="fixed inset-0 -z-10 bg-gradient-to-b from-blue-700 via-sky-500 to-cyan-400"></div>
+
+  <!-- Contenedor -->
+  <div class="min-h-[calc(100vh-240px)] flex items-center justify-center px-4">
+    <div class="w-full max-w-md rounded-2xl mb-20 border border-white/20 bg-white/90 shadow-2xl backdrop-blur">
+
+      <!-- Header -->
+      <div class="px-6 pt-6 text-center">
+        <div class="inline-flex items-center gap-2 select-none">
+          <img src="{% static 'img/logo.png' %}" alt="Turnate" class="h-12 w-auto" />
+          <span class="text-2xl font-extrabold tracking-tight text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.8)]">
+            Turnate
+          </span>
+        </div>
+        <h1 class="mt-3 text-xl font-semibold text-slate-800">Iniciar sesión</h1>
+        <p class="text-sm text-slate-500">Accedé a tu cuenta para gestionar tus turnos.</p>
+      </div>
+
+      <!-- Cuerpo -->
+      <div class="p-6">
+
+        {% if form.errors %}
+        <div class="mb-4 rounded-xl bg-red-50 text-red-700 text-sm px-4 py-2 ring-1 ring-red-200">
+            {% for field, errors in form.errors.items %}
+                <ul>
+                    {%for error in errors%}
+                        
+                        <li>
+                            {{ error }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+
+        </div>
+        {% endif %}
+
+        <form method="post" class="grid gap-3">
+          {% csrf_token %}
+
+          <!-- Campo email o usuario -->
+          <input
+            type="text"
+            name="username"
+            placeholder="Email o Usuario"
+            value="{{ request.POST.username }}"
+            required
+            class="rounded-xl border border-slate-200 bg-white/90 px-4 py-3"
+          />
+
+          <!-- Campo password -->
+          <input
+            type="password"
+            name="password"
+            placeholder="Contraseña"
+            required
+            class="rounded-xl border border-slate-200 bg-white/90 px-4 py-3"
+          />
+
+          <!-- Botón ingresar -->
+          <button
+            type="submit"
+            class="mt-1 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-400 
+                   text-white font-bold py-2.5 px-4 shadow-lg ring-1 ring-blue-300/40"
+          >
+            Ingresar
+          </button>
+
+          <!-- Enlace registro -->
+          <a
+            href="{% url 'registro' %}"
+            class="text-sm text-blue-700 underline mt-1 justify-self-center"
+          >
+            ¿No tenés cuenta? Registrate
+          </a>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
