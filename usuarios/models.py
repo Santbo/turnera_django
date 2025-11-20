@@ -11,6 +11,11 @@ class Usuario (AbstractUser):
         self.es_emprendedor = True
         self.save()
 
+    @property
+    def inicial_nombre(self):
+        
+        return self.first_name[0]
+
 
 class Emprendimiento (models.Model):
 
