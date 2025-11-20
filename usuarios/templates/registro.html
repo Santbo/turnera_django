@@ -1,0 +1,94 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div class="bg-blue-600 shadow-2xl rounded-xl p-8 w-full max-w-md ">
+
+        <h2 class="text-3xl font-bold text-center mb-6">
+            Crear Cuenta
+        </h2>
+
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div>
+                
+                {{ form.username.label_tag }}
+                {{ form.username }}
+            </div>
+
+            <!-- First name -->
+            <div>
+                
+                {{ form.first_name.label_tag }}
+                {{ form.first_name }}
+            </div>
+
+            <!-- Last name -->
+            <div>
+                {{ form.last_name.label_tag }}
+                {{ form.last_name }}
+            </div>
+
+            <!-- Email -->
+            <div>
+                {{ form.email.label_tag }}
+                {{ form.email }}
+            </div>
+
+            <!-- Teléfono -->
+            <div>
+                {{ form.telefono.label_tag }}
+                {{ form.telefono }}
+            </div>
+
+            <!-- Password -->
+            <div>
+                {{ form.password1.label_tag }}
+                {{ form.password1 }}
+            </div>
+
+            <!-- Repeat Password -->
+            <div>
+                
+                {{ form.password2.label_tag }}
+                {{ form.password2 }}
+            </div>
+
+            <!-- Errores del formulario -->
+            {% if form.errors %}
+                <div class="bg-red-500 text-white p-2 rounded">
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+
+            <button
+                type="submit"
+                class="w-full bg-white text-blue-700 font-semibold py-2 rounded-lg hover:bg-gray-200 transition">
+                Registrarme
+            </button>
+
+            <p class="text-center text-sm mt-3">
+                ¿Ya tenés una cuenta?
+                <a href={% url 'login'%} class="underline font-semibold text-white">
+                    Iniciar sesión
+                </a>
+            </p>
+        </form>
+
+    </div>
+
+</body>
+</html>
