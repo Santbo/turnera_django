@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="{% static "img/favicon.ico" %}" type="image/x-icon">
   <title>{% block titulo %} {% endblock %} - Turnate</title>
-  {%block css%} {%endblock%}
+
   {%block js%} {%endblock%}
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -15,10 +15,148 @@
   <style type="text/tailwindcss">
 
   </style>
+
+  {%block css%} {%endblock%}
 </head>
 <body>
   
-  
+  <header class="bg-blue-600 fixed inset-x-0 top-0 z-50 h-24">
+    <div class="w-full h-full px-4 flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="{% url 'base:index' %}" class="flex items-center gap-3">
+        <img
+          src="{% static "img/logo.svg" %}"
+          alt="Turnate"
+          class="h-11 w-auto select-none"
+        />
+        <span class="font-extrabold text-2xl text-white tracking-tight">Turnate</span>
+      </a>
+
+      <!-- Navegación -->
+      <nav class="flex items-center gap-3">
+
+        <a id="lnkIndex" href="{% url 'base:index' %}" >Inicio</a>
+        <a id="lnkNosotros" href="{% url 'base:nosotros' %}" >Nosotros</a>
+
+        {% if user.is_authenticated and user.is_admin %}
+        {% comment %} #TODO: Poner url de reportes del admin {% endcomment %}
+          <a id="lnkReportes" href="" >Reportes</a>
+        {% endif %}
+
+        {% if not user.is_authenticated %}
+        {% comment %} #TODO: Poner url del login y del registro {% endcomment %}
+          <a id="lnkLogin" href="" >Iniciar sesión</a>
+          <a id="lnkRegistro" href="" >Registrarse</a>
+
+        {% else %}
+          <details class="relative ml-2 group">
+            <summary
+              class="list-none rounded-full outline-none cursor-pointer focus-visible:ring-4 focus-visible:ring-white/40"
+            >
+              <div class="w-10 h-10 grid place-items-center rounded-full text-white font-semibold border border-white/50 bg-white/10 backdrop-blur-sm">
+                {{ user.inicial_nombre }}
+              </div>
+            </summary>
+
+            <!-- Menú -->
+            <div
+              class="absolute right-0 mt-3 w-72 rounded-2xl bg-white shadow-xl ring-1 ring-black/5 overflow-hidden origin-top-right"
+            >
+              <!-- Encabezado -->
+              <div class="px-4 py-3 bg-gradient-to-r from-slate-50 to-white border-b">
+                <p class="text-[11px] uppercase tracking-wide text-slate-500">Sesión iniciada</p>
+
+                <div class="mt-1 flex items-center gap-2">
+                  <div class="w-8 h-8 grid place-items-center rounded-full bg-slate-100 text-slate-700 text-sm font-semibold">
+                    {{ user.inicial_nombre }}
+                  </div>
+
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-slate-900 truncate">{{ user.display_name }}</p>
+
+                    {% if user.is_admin %}
+                      <span class="inline-flex items-center gap-1 text-[11px] px-2 py-[2px] rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200">
+                        Administrador
+                      </span>
+                    {% elif user.es_emprendedor %}
+                      <span class="inline-flex items-center gap-1 text-[11px] px-2 py-[2px] rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">
+                        Emprendedor
+                      </span>
+                    {% else %}
+                      <span class="inline-flex items-center gap-1 text-[11px] px-2 py-[2px] rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-200">
+                        Cliente
+                      </span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Items -->
+              <ul class="py-1 text-sm">
+
+                <li>
+                  {% comment %} #TODO: Poner url de reservar turno {% endcomment %}
+                  <a href="" class="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-sky-600">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Reservar</span>
+                  </a>
+                </li>
+
+                <li>
+                  {% comment %} #TODO: Poner url de turnos {% endcomment %}
+                  <a href="" class="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-sky-600">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Turnos</span>
+                  </a>
+                </li>
+
+                <li>
+                  {% comment %} #TODO: Poner url de perfil {% endcomment %}
+                  <a href="" class="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-sky-600">
+                    <i class="fa-solid fa-user"></i>
+                    <span>Perfil</span>
+                  </a>
+                </li>
+
+                {% if user.is_emprendedor %}
+                <li>
+                  {% comment %} #TODO: Poner url de emmprendimiento {% endcomment %}
+                  <a href="" class="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-sky-600">
+                    <i class="fa-solid fa-briefcase"></i>
+                    <span>Emprendimiento</span>
+                  </a>
+                </li>
+                {% endif %}
+
+                <li class="my-1 border-t"></li>
+
+                <li>
+                  {% comment %} #TODO: Poner url de logout {% endcomment %}
+                  <form action="" method="post">
+                    {% csrf_token %}
+                    <button
+                      class="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-left text-rose-600"
+                      type="submit"
+                    >
+                      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                      <span>Cerrar sesión</span>
+                    </button>
+                  </form>
+                </li>
+
+              </ul>
+
+            </div>
+          </details>
+
+        {% endif %}
+
+      </nav>
+
+    </div>
+  </header>
+
 
   <div class="min-h-screen pt-20 md:pt-24 pb-10">
     {% block contenido %} {%endblock%}
