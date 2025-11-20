@@ -17,5 +17,5 @@ class LoginUsuarioView(LoginView):
         user = self.request.user
         if user.is_staff:        # si es admin
             return reverse_lazy("admin:index")
-        return reverse_lazy("home") 
+        return reverse_lazy("base:index") 
     
