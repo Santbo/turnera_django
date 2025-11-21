@@ -150,13 +150,12 @@
           {% endif %}
         </div>
       </form>
-    </div>
 
-    <!-- Lista de servicios -->
-    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 class="text-xl font-semibold mb-3 text-slate-800">Tus servicios</h2>
-        <ul id="ul-servicios" class="divide-y divide-slate-100">
-        </ul>
+      <div class="mt-8 py-8 border-t-1 border-slate-200">
+        <h2 class="text-xl font-semibold mb-3 text-slate-800 ">Tus servicios</h2>
+        <ul id="ul-servicios" class="divide-y divide-slate-100 max-h-80 overflow-y-auto"></ul>
+      </div>
+
     </div>
 
     {% comment %} Modal de confirmacion de cierre {% endcomment %}

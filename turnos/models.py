@@ -178,6 +178,7 @@ class Turno(models.Model):
         "usuarios.Usuario",
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
         related_name="turnos_creados",
     )
 

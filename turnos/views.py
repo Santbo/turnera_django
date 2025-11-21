@@ -12,13 +12,13 @@ from django.views.generic import (
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect
 
-from .models import Servicio, Horario
+from .models import Servicio, Horario, Turno
 from .forms import ServicioForm
 
 
 # TODO: Esto debería tener un loginrequired y evitar xss
 
-
+# ! ------------------------------ Horarios -----------------------------------------
 class HorariosAPIView(View):
 
     def get(self, request, *args, **kwargs):
@@ -121,6 +121,26 @@ class HorariosAPIView(View):
         return JsonResponse({"ok": True})
 
 
+class HorariosView(TemplateView):
+    template_name = "horarios.html"
+
+    # Se tiene que pasarle un contexto con los días al template, porque si no hay que hacer todo el html a manopla.
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["dias"] = [
+            (0, "Lunes"),
+            (1, "Martes"),
+            (2, "Miércoles"),
+            (3, "Jueves"),
+            (4, "Viernes"),
+            (5, "Sábado"),
+            (6, "Domingo"),
+        ]
+        return context
+
+
+# ! --------------------------- Servicios -------------------------------------------
+
 class ServiciosAPIView(View):
     """
     Obtener la lista de servicios del emprendedor.
@@ -149,24 +169,6 @@ class ServiciosAPIView(View):
         return JsonResponse({"servicios": respuesta}, safe=False)
 
 
-class HorariosView(TemplateView):
-    template_name = "horarios.html"
-
-    # Se tiene que pasarle un contexto con los días al template, porque si no hay que hacer todo el html a manopla.
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["dias"] = [
-            (0, "Lunes"),
-            (1, "Martes"),
-            (2, "Miércoles"),
-            (3, "Jueves"),
-            (4, "Viernes"),
-            (5, "Sábado"),
-            (6, "Domingo"),
-        ]
-        return context
-
-
 class ServicioCreateView(CreateView):
     model = Servicio
     form_class = ServicioForm
@@ -183,7 +185,6 @@ class ServicioCreateView(CreateView):
         context = super().get_context_data(**kwargs)
         context["editando"] = False
         return context
-
 
 
 class ServicioUpdateView(UpdateView):
@@ -214,3 +215,44 @@ class ServicioDeleteView(View):
         )
         servicio.delete()
         return redirect("turnos:listado_servicios")
+
+
+# ! ----------------------------------------- Turnos --------------------------------
+
+class TurnosEmprendedorAPIView(View):
+    """
+    Obtener la lista de todos los turnos que tiene el emprendedor.
+    """
+
+    def get(self, request, *args, **kwargs):
+        usuario = request.user
+
+        if not usuario.es_emprendedor:
+            return JsonResponse({"error": "El usuario no es emprendedor"}, status=403)
+
+        turnos = Turno.objects.filter(emprendedor = usuario.emprendimiento)
+
+        respuesta = [
+            {
+                "id": t.id,
+                "servicio": {
+                    "nombre": t.servicio.nombre,
+                    "duracion": t.servicio.duracion,
+                    "precio": t.servicio.precio,
+                    "color": t.servicio.color
+                },
+                "turno": {
+                    "inicio": t.inicio,
+                    "fin": t.fin,
+                    "nota": t.nota,
+                    "estado": t.estado
+                },
+                "cliente": {
+                    "nombre": t.cliente.nombre_completo if t.cliente != None else t.cliente_nombre,
+                    "contacto": t.cliente.telefono if t.cliente != None else t.cliente_contacto
+                }
+
+            } for t in turnos
+        ]
+
+        return JsonResponse({"turnos": respuesta}, safe=False)
