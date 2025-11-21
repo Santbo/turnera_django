@@ -1,7 +1,7 @@
 import json
 from django.views import View
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse
 from django.core.exceptions import ValidationError
 from django.views.generic import (
     TemplateView,
@@ -121,6 +121,34 @@ class HorariosAPIView(View):
         return JsonResponse({"ok": True})
 
 
+class ServiciosAPIView(View):
+    """
+    Obtener la lista de servicios del emprendedor.
+
+    Usada para el listado de servicios en /turnos/servicios
+    """
+
+    def get(self, request, *args, **kwargs):
+        usuario = request.user
+
+        if not usuario.es_emprendedor:
+            return JsonResponse({"error": "El usuario no es emprendedor"}, status=403)
+
+        servicios = Servicio.objects.filter(emprendedor = usuario.emprendimiento)
+
+        respuesta = [
+            {
+                "id": s.id,
+                "nombre": s.nombre,
+                "duracion": s.duracion,
+                "precio": s.precio,
+                "color": s.color
+            } for s in servicios
+        ]
+
+        return JsonResponse({"servicios": respuesta}, safe=False)
+
+
 class HorariosView(TemplateView):
     template_name = "horarios.html"
 
@@ -139,14 +167,11 @@ class HorariosView(TemplateView):
         return context
 
 
-class ServicioListCreateView(CreateView, ListView):
+class ServicioCreateView(CreateView):
     model = Servicio
     form_class = ServicioForm
     template_name = "servicios.html"
     success_url = reverse_lazy("turnos:listado_servicios")
-
-    def get_queryset(self):
-        return Servicio.objects.filter(emprendedor=self.request.user.emprendimiento)
 
     def form_valid(self, form):
         servicio = form.save(commit=False)
@@ -154,16 +179,11 @@ class ServicioListCreateView(CreateView, ListView):
         servicio.save()
         return super().form_valid(form)
 
-    # la listview necesita el context_object_name para saber qué nombre le pone a los datos
-    # que tiene que mostrar
-    context_object_name = "servicios"
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Esto tiene que estar acá porque el template lo usa para saber si mostrar
-        # el botón de cancelar edición, total se usa el mismo template para los dos
         context["editando"] = False
         return context
+
 
 
 class ServicioUpdateView(UpdateView):

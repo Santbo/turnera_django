@@ -1,6 +1,11 @@
 {% extends "_base.html" %}
+{% load humanize %}
 
 {% block titulo %}Servicios{% endblock titulo %}
+
+{% block js %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.5.2/jscolor.min.js" integrity="sha512-qFhMEJrjI50TwLDGZ7Oi0ksTSWnFOqTNXhlqqUgWnE65S23rWUtQOv+tMNEybkMYSXKgAc3eg/SzkX+qrtJT/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% endblock js %}
 
 {% block contenido %}
   <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-6">
@@ -16,6 +21,35 @@
         </p>
       </div>
 
+    {% if form.errors %}
+      <div
+        id="div-errores"
+          class="mb-6 rounded-xl border border-rose-300 bg-rose-50 p-4 shadow-sm animate-fade-in"
+      >
+        <div class="flex items-start gap-3">
+          <i class="fa fa-triangle-exclamation text-xl text-rose-700"></i>
+
+          <div class="flex-1">
+            <h3 class="text-sm font-semibold text-rose-700">
+              Se encontraron errores al guardar el servicio:
+            </h3>
+            
+            {% comment %} #TODO: Hacer mas lindo esto {% endcomment %}
+            <ul id="ul-errores" class="mt-2 list-disc space-y-1 text-sm text-rose-700">
+              {{form.errors}}
+            </ul>
+          </div>
+          <button
+            type="button"
+            class="text-rose-600 hover:text-rose-800 cursor-pointer"
+            onclick="document.getElementById('div-errores').remove()"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    {% endif %}
+
     {% comment %} Formulario de creacion edicion {% endcomment %}
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h2 class="text-2xl font-semibold text-slate-900 mb-4">
@@ -27,7 +61,11 @@
         {% endif %}
       </h2>
 
-      <form method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {% if editando %}
+          <form method="POST" action="{% url 'turnos:edicion_servicio' servicio_editando.id %}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {% else %}
+          <form method="POST" action="{% url 'turnos:listado_servicios' %}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {% endif %}
         {% csrf_token %}
 
         <!-- Nombre -->
@@ -67,11 +105,11 @@
             Precio (opcional) 
           </label>
           <input
-            type="decimal"
-            step="50"
+            type="number"
+            step="0.1"
             min="0"
             name="precio"
-            value="{{ form.precio.value|default_if_none:'30' }}"
+            value="{{ form.precio.value|floatformat  }}"
             placeholder="0"
             class="w-full mt-1 rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500"
           />
@@ -86,9 +124,9 @@
           <input
             type="text"
             name="color"
+            data-jscolor="{required:true, format:'hex'}"
             value="{{ form.color.value|default_if_none:'' }}"
-            placeholder="#FF5733"
-            class="w-full mt-1 rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500"
+            class="w-full mt-1 rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 cursor-pointer"
           />
         </div>
 
@@ -96,10 +134,11 @@
         <div class="md:col-span-2 flex items-end gap-3 mt-2">
           <button
             type="submit"
-            class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+            class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 cursor-pointer"
           >
             {% if editando %} Guardar cambios {% else %} Crear servicio {% endif %}
           </button>
+
 
           {% if editando %}
             <a
@@ -109,19 +148,6 @@
               Cancelar edición
             </a>
           {% endif %}
-
-          {% if mensaje %}
-            <span
-              class="text-sm rounded-lg px-3 py-2
-                {% if mensaje_tipo == 'err' %}
-                  bg-red-50 text-red-700 ring-1 ring-red-200
-                {% else %}
-                  bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
-                {% endif %}"
-            >
-              {{ mensaje }}
-            </span>
-          {% endif %}
         </div>
       </form>
     </div>
@@ -129,47 +155,133 @@
     <!-- Lista de servicios -->
     <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h2 class="text-xl font-semibold mb-3 text-slate-800">Tus servicios</h2>
-
-      {% if servicios|length == 0 %}
-        <div class="text-sm text-slate-500">Aún no cargaste servicios.</div>
-      {% else %}
-        <ul class="divide-y divide-slate-100">
-          {% for s in servicios %}
-          <li class="py-3 flex items-center justify-between gap-3">
-            <div>
-              <p class="font-medium text-slate-900">{{ s.nombre }}</p>
-              <p class="text-xs text-slate-500">
-                {{ s.duracion }} min
-                {% if s.precio %}
-                  · AR$ {{ s.precio }}
-                {% endif %}
-              </p>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <a
-                href="{% url 'turnos:edicion_servicio' s.id %}"
-                class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
-              >
-                Editar
-              </a>
-
-              <form action="{% url 'turnos:eliminar_servicio' s.id %}" method="POST">
-                {% csrf_token %}
-                <button
-                  type="submit"
-                  class="rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-700"
-                >
-                  Eliminar
-                </button>
-              </form>
-            </div>
-          </li>
-          {% endfor %}
+        <ul id="ul-servicios" class="divide-y divide-slate-100">
         </ul>
-      {% endif %}
+    </div>
+
+    {% comment %} Modal de confirmacion de cierre {% endcomment %}
+
+    <div id="modalConfirmacion"
+        class="hidden fixed inset-0 bg-black/40 flex items-center justify-center">
+      <div class="bg-white rounded-xl p-6 w-120 shadow-xl">
+        <h2 class="text-lg font-bold text-gray-800 mb-2">¿Eliminar servicio?</h2>
+        <p class="text-sm text-gray-600 mt-1">
+          Si elimina el servicio, se eliminarán <b class="font-bold text-red-500">TODOS</b> los turnos asociados al mismo.
+        </p>
+        <p class="text-sm text-gray-600 mt-1 text-red-500 font-bold">
+          Perderá de manera irreversible todos los turnos que existan de este servicio. 
+        </p>
+        <p class="text-sm text-gray-600 mt-1">
+          ¿Está seguro de que quiere eliminar el servicio?
+        </p>
+
+        <form id="formEliminar" method="POST" class="mt-4">
+          {% csrf_token %}
+          <div class="flex justify-end gap-2">
+            <button
+                type="button"
+                onclick="cerrarModalConfirmacion()"
+                class="px-3 py-2 text-sm rounded-lg border cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+                type="submit"
+                class="px-3 py-2 text-sm rounded-lg bg-rose-600 text-white hover:bg-rose-700 cursor-pointer"
+            >
+              Eliminar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
   </div>
 
 {% endblock %}
+
+{% block js_final %}
+<script>
+const cargarServicios = async () =>  {
+    const lista = document.getElementById("ul-servicios");
+    lista.innerHTML = `<p class="text-sm text-slate-500">Cargando servicios...</p>`;
+
+    try {
+        const resp = await fetch("{% url 'turnos:api_servicios' %}");
+        const data = await resp.json();
+
+        console.log(data);
+
+        const servicios = data.servicios || [];
+
+        if (servicios.length === 0) {
+            lista.innerHTML = `<p class="text-sm text-slate-500">No hay servicios cargados.</p>`;
+            return;
+        }
+
+        lista.innerHTML = "";
+
+        servicios.forEach(s => {
+            const precioTexto = s.precio
+                ? `· $${Number(s.precio).toLocaleString("es-AR")}`
+                : "· Gratuito";
+
+            lista.innerHTML += `
+                <li class="py-3 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-4">
+                        <div class="relative w-8 h-8 rounded-full shadow bg-[${s.color}]">
+                            <div class="absolute inset-0 rounded-full border"
+                                style="border-color: ${s.color}; filter: brightness(0.8);">
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-medium text-slate-900">${s.nombre}</p>
+                            <p class="text-xs text-slate-500">
+                                ${s.duracion} minutos ${precioTexto}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <a
+                            href="/turnos/servicios/${s.id}/editar/"
+                            class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+                        >
+                            Editar
+                        </a>
+
+                        <button
+                            onclick="abrirModalConfirmacion(${s.id})"
+                            class="rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-700 cursor-pointer"
+                        >
+                            Eliminar
+                        </button>
+
+                    </div>
+                </li>
+            `;
+        });
+
+    } catch (error) {
+        console.error(error);
+        lista.innerHTML = `<p class="text-sm text-rose-600">Error al cargar los servicios.</p>`;
+    }
+}
+
+  const abrirModalConfirmacion = (id) => {
+    const modal = document.getElementById("modalConfirmacion");
+    const form = document.getElementById("formEliminar");
+
+    form.action = `/turnos/servicios/${id}/eliminar/`;
+
+    modal.classList.remove("hidden");
+  }
+
+  function cerrarModalConfirmacion() {
+    document.getElementById("modalConfirmacion").classList.add("hidden");
+  }
+  document.addEventListener("DOMContentLoaded", cargarServicios);
+</script>
+
+{% endblock js_final %}
