@@ -1,8 +1,8 @@
-{% extends "_base.html" %}
+{% extends "panel_perfil.html" %}
 
-{% block contenido%}
+{% block panel_contenido%}
 
-<div class="max-w-4xl mx-auto px-4 py-10">
+<div class=" mx-auto px-4 py-10 bg-slate-100">
     <div class="bg-white rounded-3xl shadow-xl p-8">
 
         <!-- Título -->
@@ -35,8 +35,8 @@
 
                     <!-- Cuadro avatar -->
                     <div class="h-[92px] w-[92px] rounded-full overflow-hidden border border-slate-200 bg-slate-50 grid place-items-center text-slate-400">
-                        {% if avatar_url %}
-                            <img src="{{ avatar_url }}" alt="avatar" class="h-full w-full object-cover">
+                        {% if user.imagen %}
+                            <img src="{{ user.imagen.url }}" alt="Foto de Perfil" class="h-full w-full object-cover">
                         {% else %}
                             <span class="text-xs">Sin foto</span>
                         {% endif %}
@@ -45,19 +45,19 @@
                     <!-- Botones -->
                     <div class="flex items-center gap-2">
                         <input
-                            id="avatar"
+                            id="imagen"
                             type="file"
-                            name="avatar"
+                            name="imagen"
                             accept="image/*"
                             class="hidden"
                         />
 
-                        <label for="avatar"
+                        <label for="imagen"
                             class="cursor-pointer rounded-lg bg-blue-600 text-white px-3 py-2 text-sm hover:bg-blue-700 transition">
                             Seleccionar foto
                         </label>
 
-                        <button type="submit" name="guardar_avatar"
+                        <button type="submit" name="guardar_imagen"
                             class="rounded-lg bg-green-600 text-white px-3 py-2 text-sm hover:bg-green-700 transition">
                             Guardar foto
                         </button>
@@ -124,7 +124,7 @@
                 <button
                     type="submit"
                     name="guardar_perfil"
-                    class="rounded-xl bg-blue-600 text-white font-semibold px-6 py-3 shadow hover:bg-blue-700 transition">
+                    class="rounded-xl bg-blue-600 text-white font-semibold px-6 py-3 shadow hover:bg-blue-700 transition mt-4">
                     Guardar cambios
                 </button>
             </div>
@@ -217,5 +217,5 @@
     </div>
 </div>
 
-</body>
+
 {% endblock%}

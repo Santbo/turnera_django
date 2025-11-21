@@ -5,6 +5,7 @@ class Usuario (AbstractUser):
     es_emprendedor = models.BooleanField(default = False)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     telefono = models.CharField(max_length=20, blank=True, null= True)
+    imagen = models.ImageField(upload_to="img/perfil/", blank=True, null=True)
 
     def activar_emprendedor(self):
 

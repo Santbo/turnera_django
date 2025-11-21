@@ -54,7 +54,14 @@
               class="list-none rounded-full outline-none cursor-pointer focus-visible:ring-4 focus-visible:ring-white/40"
             >
               <div class="w-10 h-10 grid place-items-center rounded-full text-white font-semibold border border-white/50 bg-white/10 backdrop-blur-sm">
-                {{ user.inicial_nombre }}
+
+                {% if user.imagen %}
+                  <img src="{{ user.imagen.url }}" 
+                    alt="Foto de perfil"
+                    class="h-full w-full object-cover rounded-full">
+                {% else %}
+                  {{ user.inicial_nombre }}
+                {% endif %}
               </div>
             </summary>
 
