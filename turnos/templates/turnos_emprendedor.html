@@ -15,10 +15,14 @@
     }
   </style>
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 {% endblock css %}
 
 {% block js %}
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
 {% endblock js %}
 
 {% block contenido %}
@@ -89,13 +93,73 @@
   </div>
   
 </div>
+
+<div
+  id="modal-turnos"
+  class="fixed hidden inset-0 z-[90] grid place-items-center bg-slate-900/60 backdrop-blur-sm px-3"
+>
+  <div class="w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+
+    {% comment %} Header {% endcomment %}
+    <div class="relative bg-gradient-to-r from-blue-700 via-sky-600 to-emerald-500 px-5 py-5 text-white">
+      <div class="flex items-center justify-between gap-3">
+
+        {% comment %} Titulo {% endcomment %}
+        <div class="flex items-center gap-3">
+          <i class="fa-regular fa-calendar-days text-3xl"></i>
+
+          <div>
+            <h2 id="modal-titulo" class="text-xl md:text-2xl font-extrabold tracking-tight">
+              Nuevo turno
+            </h2>
+            <p class="text-white/90 text-sm">Día → Servicio → Horario. Validamos choques y bloques.</p>
+          </div>
+        </div>
+
+        {% comment %} Boton de cerrar {% endcomment %}
+          <button
+            type="button"
+            class="text-white hover:text-gray-50 cursor-pointer text-2xl"
+            onclick="cerrarModalTurnos()"
+          >
+            ✕
+          </button>
+
+      </div>
+    </div>
+
+    <form class="p-5" onsubmit="handleSubmit(event)">
+      <div class="grid grid-cols-4 gap-3 auto-rows-fr">
+
+        <!-- 1) Día -->
+        <section class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col">
+          <h3 class="text-sm font-semibold text-slate-900 mb-2">1) Día</h3>
+          
+          <p class="mt-2 text-xs text-slate-500 mb-4">
+            Sólo verás horarios de tus bloques activos.
+          </p>
+
+          <input
+            id="input-fecha"
+            class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none focus:ring-2 focus:ring-sky-300"
+            placeholder="Selecciona un día"
+          />
+        </section>
+
+      </div>
+    </form>
+
+  </div>
+</div>
 {% endblock contenido %}
 
 {% block js_final %}
+{% comment %} JS para la carga de informacion {% endcomment %}
 <script>
 
   var calendar;
 
+  // {% comment %} # TODO: implementar las vistas de hoy, semana y todo eso  https://fullcalendar.io/docs/buttonText{% endcomment %}
   document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
     calendar = new FullCalendar.Calendar(calendarEl, {
@@ -139,9 +203,6 @@
       const b = parseInt(colorHex.substring(4, 6), 16);
 
       const yiq = (0.299 * r + 0.587 * g + 0.114 * b);
-
-      console.log(`${colorHex}: ${yiq}`)
-
       return yiq > 128 ? "#000000" : "#FFFFFF";
   }
 
@@ -263,6 +324,7 @@
 
             <button
               title="Seleccionar para editar/cancelar"
+              onclick="mostrarModalTurnos(${t.id})"
               class="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium hover:bg-slate-50"
               data-id="${t.id}"
             >
@@ -276,6 +338,8 @@
       lista.appendChild(ul);
   }
 
+
+
   document.addEventListener("DOMContentLoaded", () => {
     cargarTurnosAlCalendario();
     renderAgendaHoy();
@@ -284,4 +348,102 @@
   
 
 </script>
+
+{% comment %} JS para el modal de los turnos {% endcomment %}
+<script>
+
+  let diasQueTrabaja = [];
+  {% comment %} Los dias que el emprendedor trabaja, para despues limitar las fechas que puede
+  pickear en el datepicker {% endcomment %}
+  const obtenerDiasQueTrabaja = async () => {
+    try {
+      const response = await fetch('{%url "turnos:api_diastrabajados_emprendedor"%}', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error en la respuesta: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      return data.dias_trabajados;
+
+    } catch (error) {
+      console.error('Error al obtener días trabajados:', error);
+      return [];
+    }
+  }
+
+  const cerrarModalTurnos = () => {
+    document.getElementById("modal-turnos").classList.add("hidden");
+  }
+
+  const iniciarDatePicker = () => {
+    flatpickr("#input-fecha", {
+      altInput: true,
+      altFormat: "j \\d\\e F, Y",
+      dateFormat: "Y-m-d",
+      locale: "es",
+      enable: [
+        function(fecha) {
+          // {% comment %} El back cuenta el lunes como día cero, pero el picker cuenta el domingo como dia cero {% endcomment %}
+          // {% comment %} entonces hay que restarle uno y hacerle modulo para que no quede desfasado {% endcomment %}
+          return diasQueTrabaja.includes((fecha.getDay() - 1) % 6);
+        }
+      ]
+    });
+  }
+
+  {% comment %} la logica depende de si se está editanto o no. 
+    eso va a cambiar hacia dónde se hace el post, y si se hace o no un get para obtener los datos
+    del turno
+  {% endcomment %}
+  const mostrarModalTurnos = async (idTurno = null) => {
+
+    const tituloModal = document.getElementById("modal-titulo");
+
+    console.log(diasQueTrabaja);
+
+    iniciarDatePicker();
+
+    if (idTurno) {
+      /* {% comment %} Se está editando un turno, hay que hacer el get de los datos {% endcomment %}
+          {% comment %} Habría que: {% endcomment %}
+          {% comment %} 1. Cambiar el título {% endcomment %}
+          {% comment %} 2. Hacer el get de los datos del turno {% endcomment %}
+          {% comment %} 3. Poblar el formulario con los datos del turno {% endcomment %}
+          {% comment %} 4. Mostrar el botón de eliminar con un formulario {% endcomment %}
+      */
+
+
+    } else {
+      /* {% comment %} Se está creando un turno {% endcomment %}
+          {% comment %} Habría que: {% endcomment %}
+          {% comment %} 1. Cambiar el título {% endcomment %}
+          {% comment %} 2. Hacer el get de los dias que se trabaja y limitar el calendario {% endcomment %}
+          {% comment %} 3. En el evento select del calendario, hacer el get de los horarios de ese día filtrados por ??????? {% endcomment %}
+          {% comment %} 4.  ?????? {% endcomment %}
+          {% comment %} 5. Aprobar la materia {% endcomment %}
+      */
+
+    }
+    document.getElementById("modal-turnos").classList.remove("hidden");
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert("Se submiteó el form");
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    diasQueTrabaja = await obtenerDiasQueTrabaja();
+  });
+
+</script>
+
 {% endblock js_final %}

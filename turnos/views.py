@@ -222,6 +222,8 @@ class ServicioDeleteView(View):
 class TurnosEmprendedorAPIView(View):
     """
     Obtener la lista de todos los turnos que tiene el emprendedor.
+
+    ! Solo funciona para emprendedor.
     """
 
     def get(self, request, *args, **kwargs):
@@ -256,3 +258,38 @@ class TurnosEmprendedorAPIView(View):
         ]
 
         return JsonResponse({"turnos": respuesta}, safe=False)
+    
+
+# TODO: Estas vistas funcionan unicamente para el emprendedor porque dependen de su 
+# id, que viene en la request. Los templates que vayan a ser para el usuario deben agregar la id del
+# emprendedor en algun lado.
+class DiasQueTrabajaEmprendedorAPIView(View):
+    """
+    Obtener la lista de todos los días (del 0 al 6) que trabaja el emprendedor.
+
+    ! Solo funciona para emprendedor.
+    """
+
+    def get(self, request, *args, **kwargs):
+        usuario = request.user
+
+        if not usuario.es_emprendedor:
+            return JsonResponse({"error": "El usuario no es emprendedor"}, status=403)
+
+        horarios = Horario.objects.filter(emprendedor = usuario.emprendimiento)
+
+        respuesta = list({ h.dia_semana for h in horarios })
+
+        return JsonResponse({"dias_trabajados": respuesta}, safe=False)
+    
+
+# El algoritmo debería ser algo como
+# traer todos los turnos de ese día, y generar un array, donde cada elemento representa un intervalo de tiempo de ese día
+# segun el turno, se ponga un 1 si el horario está ocupado, 0 si no. Aca hay fragmentacion interna pero no hay con que darle
+# despues, hacer un array nuevo con el nuevo turno solamente, de la misma longitud que el array anterior,
+# si se hace el AND y el array resultante tiene por lo menos un 1, entonces se chocan. Si no, no
+# algo como:
+# ocupados =   [1, 1, 0, 0, 1, 0, 1, 0]
+# nuevo    =   [0, 1, 1, 0, 0, 0, 0, 0]
+# resultado =  [0, 1, 0, 0, 0, 0, 0, 0] -> Se chocan en el segundo intervalo, no se puede sacar turno
+# o, también se puede copiar y pegar el codigo de horarios porque es literalmente lo mismo, no me la contés
