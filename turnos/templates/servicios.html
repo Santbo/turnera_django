@@ -1,0 +1,175 @@
+{% extends "_base.html" %}
+
+{% block titulo %}Servicios{% endblock titulo %}
+
+{% block contenido %}
+  <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-6">
+
+    {% comment %} Titulo {% endcomment %}
+      <div class="">
+        <h1 class="text-4xl font-bold inline-block tracking-tight bg-gradient-to-r from-sky-700 to-indigo-600 bg-clip-text text-transparent">
+          Servicios
+        </h1>
+
+        <p class="mt-2 text-sm md:text-base text-slate-600 leading-relaxed">
+          Definí lo que ofrecés, la duración y los precios. Luego, podrás asignar turnos.
+        </p>
+      </div>
+
+    {% comment %} Formulario de creacion edicion {% endcomment %}
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-2xl font-semibold text-slate-900 mb-4">
+        {% if editando %}
+          Editar servicio: 
+          <span class="font-normal text-blue-900">{{ servicio_editando.nombre }}</span>
+        {% else %}
+          Crear un nuevo servicio
+        {% endif %}
+      </h2>
+
+      <form method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {% csrf_token %}
+
+        <!-- Nombre -->
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold text-sky-700">
+            Nombre del servicio
+          </label>
+          <input
+            type="text"
+            name="nombre"
+            value="{{ form.nombre.value|default_if_none:'' }}"
+            placeholder="Corte de pelo"
+            class="w-full mt-1 rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        {% comment %} Duración {% endcomment %}
+        <div>
+          <label class="block text-xs font-semibold text-sky-700">
+            Duración (min)
+          </label>
+          <input
+            type="number"
+            min="5"
+            step="5"
+            name="duracion"
+            value="{{ form.duracion.value|default_if_none:'30' }}"
+            class="w-full mt-1 rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        {% comment %} Precio #TODO: Hacer esto igual que como está en registro el opcional {% endcomment %}
+        <div>
+          <label class="block text-xs font-semibold text-sky-700">
+            Precio (opcional) 
+          </label>
+          <input
+            type="decimal"
+            step="50"
+            min="0"
+            name="precio"
+            value="{{ form.precio.value|default_if_none:'30' }}"
+            placeholder="0"
+            class="w-full mt-1 rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Color -->
+        <div>
+          <label class="block text-xs font-semibold text-sky-700">
+            {% comment %} #TODO: Ponerle un tooltip sobre para qué es el color este {% endcomment %}
+            Color del servicio en el calendario
+          </label>
+          <input
+            type="text"
+            name="color"
+            value="{{ form.color.value|default_if_none:'' }}"
+            placeholder="#FF5733"
+            class="w-full mt-1 rounded-xl border border-slate-300 px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Botones -->
+        <div class="md:col-span-2 flex items-end gap-3 mt-2">
+          <button
+            type="submit"
+            class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            {% if editando %} Guardar cambios {% else %} Crear servicio {% endif %}
+          </button>
+
+          {% if editando %}
+            <a
+              href="{% url 'turnos:listado_servicios' %}"
+              class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50"
+            >
+              Cancelar edición
+            </a>
+          {% endif %}
+
+          {% if mensaje %}
+            <span
+              class="text-sm rounded-lg px-3 py-2
+                {% if mensaje_tipo == 'err' %}
+                  bg-red-50 text-red-700 ring-1 ring-red-200
+                {% else %}
+                  bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200
+                {% endif %}"
+            >
+              {{ mensaje }}
+            </span>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+
+    <!-- Lista de servicios -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h2 class="text-xl font-semibold mb-3 text-slate-800">Tus servicios</h2>
+
+      {% if servicios|length == 0 %}
+        <div class="text-sm text-slate-500">Aún no cargaste servicios.</div>
+      {% else %}
+        <ul class="divide-y divide-slate-100">
+          {% for s in servicios %}
+          <li class="py-3 flex items-center justify-between gap-3">
+            <div>
+              <p class="font-medium text-slate-900">{{ s.nombre }}</p>
+              <p class="text-xs text-slate-500">
+                {{ s.duracion }} min
+                {% if s.precio %}
+                  · AR$ {{ s.precio }}
+                {% endif %}
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <a
+                href="{% url 'turnos:edicion_servicio' s.id %}"
+                class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold hover:bg-slate-50"
+              >
+                Editar
+              </a>
+
+              <form action="{% url 'turnos:eliminar_servicio' s.id %}" method="POST">
+                {% csrf_token %}
+                <button
+                  type="submit"
+                  class="rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-700"
+                >
+                  Eliminar
+                </button>
+              </form>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+
+  </div>
+
+{% endblock %}

@@ -1,10 +1,11 @@
 from django import forms
 from django.forms import formset_factory
-from .models import Horario
+from .models import Servicio
 
-class HorarioForm(forms.ModelForm):
+class ServicioForm(forms.ModelForm):
     class Meta:
-        model = Horario
-        fields = ["inicio", "fin"]
-
-HorarioFormSet = formset_factory(HorarioForm, extra=1, can_delete=True)
+        model = Servicio
+        fields = ["nombre", "duracion", "precio", "color", "activo"]
+        widgets = {
+            "color": forms.TextInput(attrs={"type": "color"}),
+        }
