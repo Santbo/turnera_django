@@ -1,0 +1,124 @@
+{% extends "panel_perfil.html" %}
+
+{% block panel_contenido%}
+
+<div class=" h-full px-4 py-10 bg-slate-100">
+    <div class="rounded-2xl bg-white/95 shadow-lg ring-1 ring-slate-200 p-6">
+
+        <!-- Título -->
+        <div class="mb-6 flex items-center justify-between flex-wrap gap-3">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-900">Emprendimiento</h1>
+                <p class="text-sm text-slate-600">Completá los datos de tu negocio.</p>
+            </div>
+        </div>
+
+        <!-- Formulario -->
+        <form method="post" enctype="multipart/form-data"  class="grid grid-cols-1 gap-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 md:grid-cols-[auto,1fr] gap-6 items-start">
+
+                <!-- Logo -->
+                <div class="flex flex-col items-center gap-3">
+                    <div class="h-28 w-28 rounded-full overflow-hidden border border-slate-200 bg-slate-50">
+                        {% if form.instance.imagen %}
+                            <img src="{{ form.instance.imagen.url }}" alt="logo" class="h-full w-full object-cover">
+                        {% else %}
+                            <div class="grid h-full w-full place-items-center text-gray-400 text-xs">
+                                Sin logo
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <input
+                            id="imagen"
+                            type="file"
+                            name="imagen"
+                            accept="image/*"
+                            class="hidden"
+                        />
+
+                        <label for="imagen"
+                            class="cursor-pointer rounded-lg bg-blue-600 text-white px-3 py-2 text-sm hover:bg-blue-700 transition">
+                            Seleccionar foto
+                        </label>
+                    </div>
+
+                    <p class="text-[11px] text-slate-500 text-center">
+                        El logo se guardará al guardar el formulario.
+                    </p>
+                </div>
+
+                <!-- Campos principales -->
+                <div class="grid gap-4">
+
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-slate-700">Nombre del negocio</label>
+                        <input type="text" name="nombre" value="{{ form.instance.nombre }}"
+                            class="w-full rounded-xl border border-slate-200 px-4 py-3" required>
+                    </div>
+
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-slate-700">Descripción</label>
+                        <textarea name="descripcion" rows="3" value="{{ form.instance.descripcion }}"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-3">{{ form.instance.descripcion }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-slate-700">Código público</label>
+                        <div class="flex gap-2">
+                            <input required name="codigo_busqueda" value="{{ form.instance.codigo_busqueda }}"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-3 font-mono">
+                        </div>
+                    </div>
+
+                    <!-- Extras -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-slate-700">Dirección</label>
+                            <input type="text" name="direccion" value="{{ form.instance.direccion }}"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-3">
+                        </div>
+
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-slate-700">Teléfono</label>
+                            <input type="text" name="telefono" value="{{ form.instance.telefono|default:"" }}"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-3">
+                        </div>
+
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-slate-700">Rubro</label>
+                            <input type="text" name="rubro" value="{{ form.instance.rubro }}"
+                                class="w-full rounded-xl border border-slate-200 px-4 py-3">
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-1">
+                <button type="submit"
+                    class="rounded-xl bg-blue-600 text-white font-semibold px-6 py-3 shadow hover:bg-blue-700">
+                    Guardar cambios
+                </button>
+            </div>
+            {% if form.errors %}
+                <ul class="text-red-600 text-sm">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </form>
+    </div>   
+</div>
+
+{% endblock %}

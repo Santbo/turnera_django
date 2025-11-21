@@ -1,0 +1,93 @@
+{% extends "panel_perfil.html" %}
+
+{% block panel_contenido%}
+
+<div class="h-full bg-slate-100 p-4">
+    <div 
+        class="mx-auto mt-10 w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl"
+        onclick="event.stopPropagation()"
+    >
+
+        <!-- Encabezado -->
+        <div class="relative px-6 py-8 text-black bg-sky-600 border-b border-gray-300 text-white">
+            <div class="flex items-center justify-center gap-3 ">
+                <img
+                    src="/static/images/TurnateLogo.png"
+                    alt="Turnate"
+                    class="h-10 w-auto drop-shadow"
+                    onerror="this.style.display='none'"
+                />
+            </div>
+
+            <h2 class="mt-4 text-center text-2xl md:text-3xl font-extrabold text-white">
+                Activá tu plan Emprendedor
+            </h2>
+
+            <p class="mt-1 text-center text-white">
+                Link público, servicios, horarios y agenda del día.
+            </p>
+        </div>
+
+        <div class="grid gap-6 p-6 md:grid-cols-2">
+
+            <!-- Caja izquierda -->
+            <div class="rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <div class="text-sm font-semibold text-slate-700">¿Qué incluye?</div>
+                <ul class="mt-3 space-y-2 text-slate-700 text-sm">
+                    <li>• Link público para reservas.</li>
+                    <li>• Gestión de <strong>Servicios</strong> y <strong>Horarios</strong>.</li>
+                    <li>• Agenda del día sin solapados.</li>
+                    <li>• Podés regenerar tu código cuando quieras.</li>
+                </ul>
+            </div>
+
+            <!-- Caja derecha -->
+            <div class="rounded-2xl border border-slate-200 p-5 shadow-sm">
+
+                <!-- Mensajes Django -->
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="mb-4 rounded-xl px-4 py-2 text-sm ring-1
+                        {% if message.tags == 'error' %}
+                            bg-red-50 text-red-700 ring-red-200
+                        {% else %}
+                            bg-emerald-50 text-emerald-700 ring-emerald-200
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Activar -->
+                <form method="post" class="w-full" action="{% url 'usuarios:activar_emprendimiento' %}">
+                    {% csrf_token %}
+                    <button
+                        type="submit"
+                        class="w-full rounded-xl bg-gradient-to-r from-blue-600 to-emerald-400 py-3 font-bold text-white shadow ring-1 ring-blue-300/50 hover:scale-[1.01]"
+                    >
+                        Activar ahora
+                    </button>
+                </form>
+
+                <!-- Cancelar -->
+                <button
+                    onclick="window.location.href='{% url 'usuarios:perfil' %}'"
+                    class="mt-3 w-full rounded-xl border border-slate-300 bg-white py-3 font-semibold text-slate-700 hover:bg-slate-50"
+                    
+                >
+                    Cancelar
+                </button>
+
+                <p class="mt-3 text-center text-[11px] text-slate-500">
+                    Se habilitan Turnos, Servicios, Horarios y el enlace público.
+                </p>
+            </div>
+        </div>
+
+        <div class="h-2 w-full bg-gradient-to-r from-blue-500/20 via-sky-400/20 to-emerald-300/20"></div>
+
+    </div>
+</div>
+
+{% endblock %}

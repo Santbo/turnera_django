@@ -25,10 +25,11 @@ class Usuario (AbstractUser):
 
 class Emprendimiento (models.Model):
 
-    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name="emprendimiento") 
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE, related_name="emprendimiento")
     nombre = models.CharField(max_length=45, null=False)
     codigo_busqueda = models.CharField(max_length=255, null=False, unique=True)
     direccion = models.CharField(max_length=255) #Agrego 255 para copiar link de maps
     telefono =  models.CharField(max_length=20, blank=True, null= True)
     rubro = models.CharField(max_length=45)
     descripcion = models.TextField(blank=True, null=True)
+    imagen = models.ImageField(upload_to="img/perfil/", blank=True, null=True)

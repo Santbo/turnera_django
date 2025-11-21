@@ -36,8 +36,11 @@
                                 class="block text-white/90 font-medium hover:text-white">Editar Perfil</a>
                             {% comment %} TODO: agregar la url de emprendimiento {% endcomment %}
                             
-                            <a href="#"
+                            <a href="{% url 'usuarios:emprendimiento' %}"
                                 class="block text-white/90 font-medium hover:text-white">Emprendimiento</a>
+                                
+                            <a href="{% url 'usuarios:seguridad' %}"
+                                class="block text-white/90 font-medium hover:text-white">Seguridad</a>
                             {% comment %} TODO: agregar la url de emprendimiento {% endcomment %}
                             <a href="#"
                                 class="block text-white/90 font-medium hover:text-white">Turnos</a>
@@ -58,6 +61,7 @@
                                 class="w-full block text-center rounded-xl px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-rose-600 to-red-500 shadow hover:brightness-110">
                                 Cerrar sesión
                             </button>
+                            </form>
                         </div>
 
                     </div>

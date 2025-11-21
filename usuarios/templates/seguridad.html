@@ -1,0 +1,85 @@
+{% extends "panel_perfil.html" %}
+
+{% block panel_contenido%}
+
+
+<!-- ====================================================== -->
+<!-- ===== BLOQUE SEGURIDAD ===== -->
+<div class=" h-full px-4 py-10 bg-slate-100">
+    <div class="bg-white rounded-3xl shadow-xl p-8">
+
+        <!-- Contenido Seguridad -->
+        <div class="">
+
+                <!-- Título -->
+            <div class="mb-4">
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-900">Cambiar Contraseña</h2>
+                <p class="text-sm text-slate-600 mt-2">Completá los datos.</p>
+            </div>
+            <form method="POST" class="grid gap-4" action="{% url 'usuarios:seguridad' %}">
+                {% csrf_token %}
+                {% comment %} <input type="hidden" name="cambiar_password" value="1"> {% endcomment %}
+
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-slate-700">Contraseña actual</label>
+                    <input
+                        id="id_old_password"
+                        type="password"
+                        name="old_password"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                    />
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-slate-700">Nueva contraseña</label>
+                    <input
+                        id="id_new_password1"
+                        type="password"
+                        name="new_password1"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                    />
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-sm font-medium text-slate-700">Confirmar contraseña</label>
+                    <input
+                        id="id_new_password2"
+                        type="password"
+                        name="new_password2"
+                        required
+                        class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-2 focus:ring-blue-300"
+                    />
+                </div>
+
+                <ul class="text-xs text-slate-600 py-2">
+                    <li>• Al menos 8 caracteres.</li>
+                    <li>• Recomendado: letras, números y símbolos.</li>
+                </ul>
+
+                {% if form.errors %}
+                    <ul class="text-red-600 text-sm">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <button
+                    type="submit"
+                    class="rounded-xl bg-blue-600 text-white font-semibold px-6 py-3 shadow hover:bg-blue-700 transition">
+                    Actualizar contraseña
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}
