@@ -1,16 +1,18 @@
 import json
+from datetime import datetime
+
 from django.views import View
 from django.db import transaction
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import  JsonResponse
 from django.core.exceptions import ValidationError
 from django.views.generic import (
     TemplateView,
-    ListView,
     CreateView,
     UpdateView,
 )
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, redirect
+from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Servicio, Horario, Turno
 from .forms import ServicioForm
@@ -275,6 +277,35 @@ class DiasQueTrabajaEmprendedorAPIView(View):
 
         if not usuario.es_emprendedor:
             return JsonResponse({"error": "El usuario no es emprendedor"}, status=403)
+
+        horarios = Horario.objects.filter(emprendedor = usuario.emprendimiento)
+
+        respuesta = list({ h.dia_semana for h in horarios })
+
+        return JsonResponse({"dias_trabajados": respuesta}, safe=False)
+    
+
+class HorariosDisponiblesSegunTurnoEmprendedorAPIView(View):
+    """
+    Obtener la lista de los horarios disponibles para el servicio que se solicitó.
+
+    ! Solo funciona para emprendedor.
+    """
+
+    def get(self, request, id_servicio: int, fecha_solicitada: str, *args, **kwargs):
+        usuario = request.user
+
+        if not usuario.es_emprendedor:
+            return JsonResponse({"error": "El usuario no es emprendedor"}, status=403)
+        
+        try:
+            fecha_dt = datetime.strptime(fecha_solicitada, "%Y-%m-%d").date()
+            servicio = Servicio.objects.get(pk = id_servicio)
+        except ValueError:
+            return JsonResponse({"error": "Fecha inválida"}, status=400)
+        except ObjectDoesNotExist:
+            return JsonResponse({"error": "Servicio inexistente"}, status=400)
+
 
         horarios = Horario.objects.filter(emprendedor = usuario.emprendimiento)
 
