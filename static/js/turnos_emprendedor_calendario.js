@@ -6,11 +6,24 @@ document.addEventListener('DOMContentLoaded', function() {
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     locale: "es",
-    dayMaxEvents: 2
+    dayMaxEvents: 2,
+    headerToolbar: {
+      left: 'prev,next,today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    views: {
+      timeGrid: {
+        eventMinHeight: 25,
+        allDaySlot: false,
+      }
+    },
+    eventClick: function(info) {mostrarModalTurnos(info.event.id)}
   });
   calendar.render();
 });
 
+var turnosEmprendedor = [];
 const obtenerTurnosEmprendedor = async () => {
     try {
       // La url viene del template de django
@@ -28,6 +41,7 @@ const obtenerTurnosEmprendedor = async () => {
         }
 
         const data = await respuesta.json();
+        turnosEmprendedor = data.turnos;
         return data.turnos;
 
     } catch (error) {
@@ -168,7 +182,7 @@ const renderAgendaHoy = async () => {
           <button
             title="Seleccionar para editar/cancelar"
             onclick="mostrarModalTurnos(${t.id})"
-            class="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium hover:bg-slate-50"
+            class="shrink-0 rounded-md border border-slate-200 bg-white px-2 py-1 text-xs font-medium hover:bg-slate-50 cursor-pointer"
             data-id="${t.id}"
           >
             Seleccionar

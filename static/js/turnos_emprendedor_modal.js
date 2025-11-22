@@ -63,20 +63,25 @@ const obtenerServiciosEmprendedor = async () => {
 }
 
 
-// TODO: Hacer que se limpien los campos del formulario
 /**
  * Cierra el modal de turnos, y limpia los datos ingresados en el formulario.
  */
 const cerrarModalTurnos = () => {
   document.getElementById("modal-turnos").classList.add("hidden");
   document.body.style.overflow = "";
+
+  // Limpiar todos los inputs
+  limpiarInputs();
+  limpiarHorarios();
+  limpiarServicios();
 }
 
+var fpFecha;
 /**
  * Inicializar el datepicker, limpia también los horarios
  */
 const iniciarDatePicker = () => {
-  flatpickr("#input-fecha", {
+  fpFecha = flatpickr("#input-fecha", {
     altInput: true,
     altFormat: "j \\d\\e F, Y",
     dateFormat: "Y-m-d",
@@ -108,7 +113,7 @@ const iniciarServicios = () => {
 
     wrapper.innerHTML = `
       <input type="radio" name="servicio" value="${s.id}" class="hidden peer" onclick="handleObtenerHorarios(${s.id})">
-      <div class="w-full h-full flex items-center gap-2 px-2 py-1 -m-2 rounded peer-checked:border peer-checked:border-sky-700">
+      <div class="w-full h-full flex items-center gap-2 px-2 py-1 -m-2 rounded peer-checked:border peer-checked:border-sky-700 peer-checked:bg-gray-50">
         <div class="relative w-3 h-3 rounded-full shadow" style="background:${s.color}">
           <div class="absolute inset-0 rounded-full border" 
               style="border-color:${s.color}; filter:brightness(0.8);"></div>
@@ -157,7 +162,7 @@ const iniciarHorarios = (horarios) => {
 
     wrapper.innerHTML = `
       <input type="radio" name="hora" value="${h}" class="hidden peer">
-      <p class="w-full h-full flex items-center gap-2 px-2 py-1 -m-2 rounded peer-checked:border peer-checked:border-sky-700">${h}</p>
+      <p class="w-full h-full flex items-center gap-2 px-2 py-1 -m-2 rounded peer-checked:border peer-checked:border-sky-700 peer-checked:bg-gray-50">${h}</p>
     `;
 
     contenedor.appendChild(wrapper);
@@ -176,35 +181,135 @@ const mostrarModalTurnos = async (idTurno = null) => {
   document.body.style.overflow = "hidden";
   const formulario = document.getElementById("formulario");
   const tituloModal = document.getElementById("modal-titulo");
-
+  const botonConfirmar = document.getElementById("btn-confirmar");
+  
   if (idTurno) {
-    /* {% comment %} Se está editando un turno, hay que hacer el get de los datos {% endcomment %}
-        {% comment %} Habría que: {% endcomment %}
-        {% comment %} 1. Cambiar el título {% endcomment %}
-        {% comment %} 2. Hacer el get de los datos del turno {% endcomment %}
-        {% comment %} 3. Poblar el formulario con los datos del turno {% endcomment %}
-        {% comment %} 4. Mostrar el botón de eliminar con un formulario {% endcomment %}
-    */
+    tituloModal.innerHTML = "Editar turno";
+    botonConfirmar.innerHTML = "Guardar";
+    formulario.action = urlActionEditar.replace("0", idTurno);
 
+    /**
+     * Hay que inicializar los servicios antes de poder mostrar el modal, porque
+     * si no, no se puede seleccionar la input que tiene el servicio seleccionado.
+     * Una vez que se selecciona eso, también hay que seleccionar el horario de nuevo,
+     * haciendo una request al endpoint. El endpoint tiene que ser capaz de saber cuándo
+     * está editando y entonces no tomar en cuenta el turno actual cuando
+     * calcula los horarios disponibles.
+     */
+
+    iniciarServicios();
+    // 1. Buscar el turno por id
+    var objetoTurno;
+    if (!window.turnosEmprendedor || !Array.isArray(window.turnosEmprendedor)) {
+      const turnos = await obtenerTurnosEmprendedor();
+      objetoTurno = turnos.find(t => t.id === idTurno);
+      console.error(`No estaba, se lo trajo de ${turnos}`)
+    } else {
+      objetoTurno = window.turnosEmprendedor.find(t => t.id == idTurno);
+    }
+
+    const dtInicioTurno = new Date(objetoTurno.turno.inicio);
+    const fechaInicioTurno = dtInicioTurno.toISOString().split("T")[0];
+
+    // 1.1 Obtener todas las inputs
+    
+    const horas = dtInicioTurno.getHours().toString().padStart(2, "0");
+    const minutos = dtInicioTurno.getMinutes().toString().padStart(2, "0");
+    const horaInicio = `${horas}:${minutos}`;
+    //TODO: Si el turno se sacó en una fecha que ya no se trabaja, el evento select del flatpickr reinicia todo
+    //TODO: Asegurarse de que no se pueda enviar si no se tiene completos los campos
+    //TODO: Si se hace click en un evento de la vista de ver más, no se cierra la vista de ver más.
+
+    // Esto siempre se puede hacer porque los servicios van a estar cargados y tienen on_delete cascade
+    // asi que no hay que preocuparse por qué hacer si no existe el servicio
+    const servicioInput = document.querySelector(`input[name="servicio"][value="${objetoTurno.servicio.id}"]`);
+    servicioInput.checked = true;
+
+    // Una vez chequeado, hay que cargar los horarios, y acá es donde la vista tiene que 
+    // asegurarse de que si se está editando, se devuelvan los horarios como si no existiera
+    // el turno actual
+    iniciarHorarios(
+      await cargarHorariosDisponibles(
+        idServicio = objetoTurno.servicio.id,
+        fechaSolicitada= fechaInicioTurno,
+        idTurno= objetoTurno.id
+      )
+    );
+    
+    // Una vez cargados los horarios, se tiene que seleccionar el del turno.
+    // Si no existe, no se selecciona, y como es required, falla el submit, obligando a la persona a seleccionar un horario nuevo.
+    const horaInput = document.querySelector(`input[name="hora"][value="${horaInicio}"]`);
+    if (horaInput) {
+      horaInput.checked = true;
+    }
+
+    const inputCliente = document.getElementById("input-cliente");
+    const inputClienteContacto = document.getElementById("input-cliente-contacto");
+    const inputNota = document.getElementById("input-nota");
+    const inputIdCliente = document.getElementById("input-id-cliente");
+
+    if (inputIdCliente.value){
+      // Si la input de la id del cliente tiene valor, entonces es porque fue el cliente quien sacó el turno
+      // y no se puede cambiar el nombre ni el contacto
+      inputCliente.disabled = true;
+      inputClienteContacto.disabled = true;
+      inputNota.disabled = true;
+
+      inputCliente.classList.add("cursor-not-allowed");
+      inputClienteContacto.classList.add("cursor-not-allowed");
+      inputNota.classList.add("cursor-not-allowed");
+    } else {
+      inputCliente.disabled = false;
+      inputClienteContacto.disabled = false;
+      inputNota.disabled = false;
+
+      inputCliente.classList.add("cursor-text");
+      inputClienteContacto.classList.add("cursor-text");
+      inputNota.classList.add("cursor-text");
+    }
+
+    inputCliente.value = objetoTurno.cliente.nombre;
+    inputClienteContacto.value = objetoTurno.cliente.contacto;
+    inputNota.value = objetoTurno.turno.nota;
+    inputIdCliente.value = objetoTurno.cliente.id;
+
+    // 3. cargar los datos al formulario
+
+    // 3.1 Verificar que la fecha del turno esté dentro de los dias que trabaja, por si se edita el horario y no el turno
+    if (diasQueTrabaja.includes(dtInicioTurno.getDay())) {
+      fpFecha.setDate(fechaInicioTurno);
+    } else {
+      // La fecha no está dentro de lo que ahora trabaja, hay que obligarlo a seleccionar de nuevo.
+    }
 
   } else {
-     // Primero hay que cambiar la action del form para que se pueda hacer un submit directamente
+     // Lo unico que hay que cambiar es la action del form para que se pueda hacer un submit directamente
      // Esto viene desde el tempalte
      formulario.action = urlActionCrear;
+     tituloModal.innerHTML = "Nuevo turno";
+     botonConfirmar.innerHTML = "Crear";
 
   }
   document.getElementById("modal-turnos").classList.remove("hidden");
 }
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  alert("Se submiteó el form");
-}
+const cargarHorariosDisponibles = async (idServicio, fechaSolicitada, idTurno = null) => {
 
-const cargarHorariosDisponibles = async (idServicio, fechaSolicitada) => {
-    const url = urlCargarHorariosDisponibles
+  var url;
+
+  // Se usa la misma logica para obtener los horarios al crear y al editar turnos, solamente se le 
+  // pasa la id a la api para que calcule bien los horarios
+  if (idTurno != null) {
+    url = urlCargarHorariosDisponiblesConTurno
+      .replace("0/", `${idServicio}/`)
+      .replace("placeholder", fechaSolicitada)
+      .replace("9999/", `${idTurno}/`);
+  } else {
+    url = urlCargarHorariosDisponibles
       .replace("0/", `${idServicio}/`)
       .replace("placeholder", fechaSolicitada);
+  }
+
 
     console.log(url);
 
@@ -254,3 +359,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
     .catch(err => console.error(err));
 });
+
+function limpiarInputs() {
+  const inputCliente = document.getElementById("input-cliente");
+  const inputClienteContacto = document.getElementById("input-cliente-contacto");
+  const inputNota = document.getElementById("input-nota");
+  const inputIdCliente = document.getElementById("input-id-cliente");
+
+  inputCliente.value = "";
+  inputClienteContacto.value = "";
+  inputNota.value = "";
+  inputIdCliente.value = "";
+  fpFecha.clear();
+}

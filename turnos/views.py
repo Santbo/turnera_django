@@ -242,6 +242,7 @@ class TurnosEmprendedorAPIView(View):
             {
                 "id": t.id,
                 "servicio": {
+                    "id": t.servicio.id,
                     "nombre": t.servicio.nombre,
                     "duracion": t.servicio.duracion,
                     "precio": t.servicio.precio,
@@ -254,6 +255,7 @@ class TurnosEmprendedorAPIView(View):
                     "estado": t.estado
                 },
                 "cliente": {
+                    "id": t.cliente.id if t.cliente != None else None,
                     "nombre": t.cliente.nombre_completo if t.cliente != None else t.cliente_nombre,
                     "contacto": t.cliente.telefono if t.cliente != None else t.cliente_contacto
                 }
@@ -415,7 +417,7 @@ class HorariosDisponiblesSegunTurnoEmprendedorAPIView(View):
 
 
 
-    def get(self, request, id_servicio: int, fecha_solicitada: str, *args, **kwargs):
+    def get(self, request, id_servicio: int, fecha_solicitada: str, id_turno: int | None = None, *args, **kwargs):
         usuario = request.user
 
         if not usuario.es_emprendedor:
@@ -453,6 +455,14 @@ class HorariosDisponiblesSegunTurnoEmprendedorAPIView(View):
         #* -------------------------------- Marcar intervalos ocupados ----------------------
         intervalos_ocupados = set()
         turnos_del_dia = Turno.objects.filter(emprendedor=usuario.emprendimiento, inicio__date = fecha_dt)
+
+        # Excluir el turno actual si se recibió una id. Esto unicamente pasa cuando se está editando un turno
+        # Se lo tiene que excluir porque el cálculo de horarios disponibles no tiene que tomar en cuenta
+        # el turno siendo editado, si no, nunca se va a poder editar el turno a menos que se le cambie
+        # el horario
+        if id_turno is not None:
+            turnos_del_dia = turnos_del_dia.exclude(id=id_turno)
+
         # Como se pueden tener muchos turnos, es mas rapido pasarlos a un dccionario
         # para encontrar mas rapido el indice al que pertenecen
         mapa_indices = { hora: indice for indice, hora in enumerate(intervalos_del_dia) }
@@ -508,6 +518,7 @@ class HorariosDisponiblesSegunTurnoEmprendedorAPIView(View):
                 intervalos_validos.append(inicio_candidato.strftime("%H:%M"))
 
         return JsonResponse({"horarios_disponibles": intervalos_validos}, safe=False)
+
 
 class TurnoEmprendedorCreateView(CreateView):
     """
@@ -581,7 +592,7 @@ class TurnoEmprendedorUpdateView(UpdateView):
         form.instance.inicio = dt_inicio
 
         # 4) Recalcular hora de fin según duración actual del servicio
-        servicio = Servicio.objects.get(pk=form.cleaned_data["servicio"])
+        servicio = form.cleaned_data["servicio"]
         duracion = timedelta(minutes=servicio.duracion)
         form.instance.fin = dt_inicio + duracion
 

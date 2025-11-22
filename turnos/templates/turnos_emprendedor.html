@@ -114,7 +114,6 @@
             <h2 id="modal-titulo" class="text-xl md:text-2xl font-extrabold tracking-tight">
               Nuevo turno
             </h2>
-            <p class="text-white/90 text-sm">Día → Servicio → Horario. Validamos choques y bloques.</p>
           </div>
         </div>
 
@@ -147,6 +146,7 @@
             class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none focus:ring-2 focus:ring-sky-300"
             placeholder="Selecciona un día"
             name="fecha"
+            required
           />
         </section>
         
@@ -220,6 +220,10 @@
               />
             </div>
 
+            {% comment %} Esto tiene que estar para soportar que el cliente saque turno. de esta forma se puede
+            saber si se puede cambiar o no el nombre en el formulario {% endcomment %}
+            <input type="hidden" id="input-id-cliente">
+
           </div>
 
           {% comment %} Botones {% endcomment %}
@@ -229,12 +233,14 @@
               id="btn-cancelar"
               class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
               onclick="cerrarModalTurnos()"
+              type="button"
             >
               Cancelar
             </button>
 
             <button
               id="btn-confirmar"
+              type="submit"
               class="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
               Crear
@@ -257,8 +263,9 @@
   const urlObtenerDiasQueTrabaja = "{% url 'turnos:api_diastrabajados_emprendedor' %}";
   const urlObtenerServiciosEmprendedor = "{% url 'turnos:api_servicios' %}";
   const urlCargarHorariosDisponibles = "{% url 'turnos:api_horarios_por_servicio' id_servicio=0 fecha_solicitada='placeholder' %}";
+  const urlCargarHorariosDisponiblesConTurno = "{% url 'turnos:api_horarios_por_servicio_con_turno' id_servicio=0 fecha_solicitada='placeholder' id_turno=9999 %}";
   const urlActionCrear = "{% url 'turnos:turnos_emprendedor_crear' %}";
-  {% comment %} const urlActionEditar = "{% url 'turnos:turnos_emprendedor_editar' %}"; {% endcomment %}
+  const urlActionEditar = "{% url 'turnos:turnos_editar' pk=0 %}";
 
 </script>
 <script type="text/javascript" src="{% static 'js/turnos_emprendedor_calendario.js' %}"></script>
