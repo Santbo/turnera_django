@@ -1,0 +1,70 @@
+<div class="">
+    <div class="w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr]">
+
+            <!-- ASIDE -->
+            <aside class="lg:sticky lg:top-[88px] self-start">
+
+                <!-- Toggle solo móvil -->
+                <div class="lg:hidden mb-3">
+                    <button 
+                        onclick="document.getElementById('panel').classList.toggle('hidden')"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                    >
+                        Mostrar / Ocultar panel
+                    </button>
+                </div>
+
+                <!-- PANEL -->
+                <div id="panel"
+                    class="bg-blue-600 h-screen hidden lg:block"
+                >
+                    <div class="rounded-2xl bg-transparent p-4">
+
+
+                        <div class="space-y-3 mt-8">
+                            {% comment %} TODO: agregar la url de reserva {% endcomment %}
+                            <a href="#"
+                                class="block text-white/90 font-medium hover:text-white">Reservar</a>
+
+                            <a href="{% url 'usuarios:perfil' %}"
+                                class="block text-white/90 font-medium hover:text-white">Editar Perfil</a>
+                            {% comment %} TODO: agregar la url de emprendimiento {% endcomment %}
+                            
+                            <a href="#"
+                                class="block text-white/90 font-medium hover:text-white">Emprendimiento</a>
+                            {% comment %} TODO: agregar la url de emprendimiento {% endcomment %}
+                            <a href="#"
+                                class="block text-white/90 font-medium hover:text-white">Turnos</a>
+
+                            {% if user.is_staff %}
+                            <a href="/admin"
+                                class="block text-white/90 font-medium hover:text-white">Admin</a>
+                            {% endif %}
+                            {% comment %} TODO: agregar la url de estadisticas {% endcomment %}
+                            <a href="#"
+                                class="block text-white/90 font-medium hover:text-white">Estadísticas</a>
+                        </div>
+
+                        <div class="mt-4">
+                            <form action="{%url "usuarios:logout" %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit"
+                                class="w-full block text-center rounded-xl px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-rose-600 to-red-500 shadow hover:brightness-110">
+                                Cerrar sesión
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- CONTENIDO PRINCIPAL -->
+            <section class="min-h-[60vh] min-w-0 bg-white/0">
+                {% block panel_contenido %}{% endblock %}
+            </section>
+
+        </div>
+    </div>
+</div>

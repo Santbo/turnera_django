@@ -3,80 +3,71 @@
 {% block contenido %}
 
 
-<div class="">
-    <div class="w-full">
-        <div class="grid grid-cols-1 lg:grid-cols-[300px_1fr]">
-
-            <!-- ASIDE -->
-            <aside class="lg:sticky lg:top-[88px] self-start">
-
-                <!-- Toggle solo móvil -->
-                <div class="lg:hidden mb-3">
-                    <button 
-                        onclick="document.getElementById('panel').classList.toggle('hidden')"
-                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700"
-                    >
-                        Mostrar / Ocultar panel
-                    </button>
-                </div>
-
-                <!-- PANEL -->
-                <div id="panel"
-                    class="bg-blue-600 h-screen hidden lg:block"
-                >
-                    <div class="rounded-2xl bg-transparent p-4">
-
-
-                        <div class="space-y-3 mt-8">
-                            {% comment %} TODO: agregar la url de reserva {% endcomment %}
-                            <a href="#"
-                                class="block text-white/90 font-medium hover:text-white">Reservar</a>
-
-                            <a href="{% url 'usuarios:perfil' %}"
-                                class="block text-white/90 font-medium hover:text-white">Editar Perfil</a>
-                            {% comment %} TODO: agregar la url de emprendimiento {% endcomment %}
-                            
-                            <a href="{% url 'usuarios:emprendimiento' %}"
-                                class="block text-white/90 font-medium hover:text-white">Emprendimiento</a>
-                                
-                            <a href="{% url 'usuarios:seguridad' %}"
-                                class="block text-white/90 font-medium hover:text-white">Seguridad</a>
-                            {% comment %} TODO: agregar la url de emprendimiento {% endcomment %}
-                            <a href="#"
-                                class="block text-white/90 font-medium hover:text-white">Turnos</a>
-
-                            {% if user.is_staff %}
-                            <a href="/admin"
-                                class="block text-white/90 font-medium hover:text-white">Admin</a>
-                            {% endif %}
-                            {% comment %} TODO: agregar la url de estadisticas {% endcomment %}
-                            <a href="#"
-                                class="block text-white/90 font-medium hover:text-white">Estadísticas</a>
-                        </div>
-
-                        <div class="mt-4">
-                            <form action="{%url "usuarios:logout" %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit"
-                                class="w-full block text-center rounded-xl px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-rose-600 to-red-500 shadow hover:brightness-110">
-                                Cerrar sesión
-                            </button>
-                            </form>
-                        </div>
-
-                    </div>
-                </div>
-
-            </aside>
-
-            <!-- CONTENIDO PRINCIPAL -->
-            <section class="min-h-[60vh] min-w-0 bg-white/0">
-                {% block panel_contenido %}{% endblock %}
-            </section>
-
-        </div>
+<aside  class="fixed h-full top-24 left-0 z-40 w-64 h-[calc(100%-4rem) ">
+    <div class="h-full px-3 py-4 overflow-y-auto bg-white border-e border-default">
+        <a href="https://flowbite.com/" class="flex items-center ps-2.5 mb-5">
+            {% if user.is_staff %}
+                <span class="inline-flex items-center justify-center gap-2 text-md px-4 py-2 rounded-full bg-amber-50 text-amber-700 ring-2 ring-amber-200">
+                    Administrador
+                </span>
+            {% elif user.es_emprendedor %}
+                <span class="inline-flex items-center justify-center gap-2 text-md px-4 py-2 rounded-full bg-emerald-50 text-emerald-700 ring-2 ring-emerald-200">
+                    Emprendedor
+                </span>
+            {% else %}
+                <span class="inline-flex items-center justify-center gap-2 text-md px-4 py-2 rounded-full bg-blue-50 text-blue-700 ring-2 ring-blue-200">
+                    Cliente
+                </span>
+            {% endif %}
+        </a>
+        <ul class="space-y-2 font-medium">
+            <li>
+                <a href="{% url 'usuarios:perfil' %}" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+                <span class="ms-3">Editar Perfil</span>
+                </a>
+            </li>
+            <li>
+                <a href="{%url "usuarios:emprendimiento" %}" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+                <span class="flex-1 ms-3 whitespace-nowrap">Emprendimiento</span>
+                </a>
+            </li>
+            <li>
+                <a href="{%url "usuarios:seguridad" %}" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+                <span class="flex-1 ms-3 whitespace-nowrap">Seguridad</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+                <span class="flex-1 ms-3 whitespace-nowrap">Turnos</span>
+                </a>
+            </li>
+            {% if user.es_emprendedor %}
+            <li>
+                <a href="#" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+                <span class="flex-1 ms-3 whitespace-nowrap">Estadisticas</span>
+                </a>
+            </li>
+            {% endif %}
+            {% if user.is_staff %}
+            <li>
+                <a href="#" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+                <span class="flex-1 ms-3 whitespace-nowrap">Administrador</span>
+                </a>
+            </li>
+            {% endif %}
+            <li>
+                <a href="{%url "usuarios:logout" %}" class="flex items-center px-2 py-1.5 text-body rounded-base hover:bg-neutral-tertiary hover:text-fg-brand group">
+                <svg class="shrink-0 w-5 h-5 transition duration-75 group-hover:text-fg-brand"  xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H4m12 0-4 4m4-4-4-4m3-4h2a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-2"/></svg>
+                <span class="flex-1 ms-3 whitespace-nowrap">Cerrar Sesión</span>
+                </a>
+            </li>
+        </ul>
     </div>
-</div>
-
-
+</aside>
+<!-- CONTENIDO PRINCIPAL -->
+    <div class="flex flex-col min-h-screen pl-64 ">
+        <section class="min-h-[60vh] min-w-0 bg-white/0">
+            {% block panel_contenido %}{% endblock %}
+        </section>
+    </div>
 {% endblock %}
