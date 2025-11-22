@@ -1,6 +1,8 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+from math import ceil
 
+from django.utils.timezone import make_aware, localtime
 from django.views import View
 from django.db import transaction
 from django.http import  JsonResponse
@@ -289,38 +291,221 @@ class HorariosDisponiblesSegunTurnoEmprendedorAPIView(View):
     """
     Obtener la lista de los horarios disponibles para el servicio que se solicitó.
 
-    ! Solo funciona para emprendedor.
+    # ! Solo funciona para emprendedor.
+
+    ## Funcionamiento:
+
+    Se tiene que:
+        1. Tomar la fecha que se recibió y obtener todos posibles inicios en las franjas horarias que tiene la fecha
+            1.1 Para cada franja horaria, se comienza desde su inicio y se van sumando el intervalo hasta su final,
+                Esto genera una lista con horas de inicio, que son todas las horas en las que puede iniciar un turno.
+
+        2. Debido a que los turnos unicamente pueden iniciar en una hora de inicio (no pueden, por ejemplo, iniciar a las 12:03), 
+            podemos tomar todos los turnos que se hayan sacado para el día, y obtener sus horas de inicio, las cuales 
+            siempre van a coincidir con un intervalo. Una vez que se tienen sus tiempos de inicio, se tiene que determinar los intervalos que ocupan.
+            2.1 Esto se hace tomando la duración del servicio al que pertenece el turno y contando cuántos intervalos ocupa.
+                siempre se tiene que redondear hacia arriba, porque la fragmentación interna siempre va a estar, y no podes
+                permitir que un turno empiece mientras otro está todavía en curso.
+                Esto se puede hacer simplemente haciendo `ocupados = ceil(duracion_turno / duracion_intervalo)`
+            2.2 Una vez que se tiene la cantidad de intervalos que ocupan, se pueden marcar todos los intervalos desde su 
+                hora de inicio hasta `ocupados`.
+                Por ejemplo:
+                    El servicio dura 45 minutos, el intervalo son 30 minutos, el turno empieza a las 08:00. Esto se repite para todos los turnos del día.
+                    intervalos_del_dia = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30"] # El horario de ese día es de 08 a 12.
+                    ocupados = ceil(turno.servicio / horario.intervalo) = ceil(45 / 30) = 2
+                    intervalos_ocupados_por_turno = ["08:00", "08:30"]
+
+            2.3 Una vez que se tiene la lista de intervalos ocupados, (y, por consecuente, la lista de intervalos disponibles), se tienen que filtrar
+                los intervalos disponibles a aquellos que permitan que el turno se complete. Por ejemplo, si mi negocio cierra a las 18:00
+                y viene un usuario a sacar un turno de dos horas a las 17:30, no se le debería permitir sacarlo.
+                Esto se hace recorriendo la lista de intervalos disponibles, y para cada intervalo:
+                    Se prueba si un turno de ese servicio que empieza en ese intervalo, tiene todos sus intervalos subsecuentes disponibles.
+                    Por ejemplo, si el turno ocupa tres intervalos:
+                        intervalos_disponibles = ["08:00", "08:30", "09:00", "09:30"]
+                            Para el intervalo "08:00":
+                                El turno ocuparía "08:00", "08:30", "09:00" -> se puede sacar porque todos esos están en intervalos_disponibles.
+                            Para el intervalo "08:30":
+                                El turno ocuparía "08:30", "09:00", "09:30" -> se puede sacar porque todos esos están en intervalos_disponibles.
+                            Para el intervalo "09:00":
+                                El turno ocuparía "09:00", "09:30", "10:00" -> no se puede sacar porque "10:00" no está en intervalos disponibles.
+        3. Ahora que se tienen los intervalos disponibles filtrados, se los devuelve.
+
+    FUNCION obtener_intervalos_disponibles(horarios_del_dia, turnos_del_dia, duracion_servicio):
+
+        INTERVALOS_DEL_DIA = []
+        DURACION_INTERVALO_DEL_DIA = horarios_del_dia[0].intervalo
+
+        # -------------------------------------------
+        # 1. GENERAR TODAS LAS HORAS DE INICIO DEL DÍA
+        # -------------------------------------------
+        PARA CADA horario EN horarios_del_dia:
+            hora_actual = horario.inicio
+            MIENTRAS hora_actual + horario.intervalo <= horario.fin:
+                AGREGAR hora_actual A INTERVALOS_DEL_DIA
+                hora_actual = hora_actual + horario.intervalo
+        FIN PARA
+
+
+        # -------------------------------------------
+        # 2. MARCAR INTERVALOS OCUPADOS
+        # -------------------------------------------
+
+        INTERVALOS_OCUPADOS = []
+
+        PARA CADA turno EN turnos_del_dia:
+
+            hora_inicio_turno = turno.inicio
+            indice = índice de hora_inicio_turno en INTERVALOS_DEL_DIA
+
+            # Cuantos intervalos ocupa este turno
+            cantidad_intervalos = CEIL(turno.duracion / DURACION_INTERVALO_DEL_DIA)
+
+            PARA i DESDE 0 HASTA cantidad_intervalos - 1:
+                AGREGAR INTERVALOS_DEL_DIA[indice + i] A INTERVALOS_OCUPADOS (si existe)
+            FIN PARA
+
+        FIN PARA
+
+
+        # -------------------------------------------
+        # 3. OBTENER INTERVALOS LIBRES
+        # -------------------------------------------
+
+        INTERVALOS_LIBRES = []
+
+        PARA cada intervalo EN INTERVALOS_DEL_DIA:
+            SI intervalo NO está en INTERVALOS_OCUPADOS:
+                AGREGAR intervalo A INTERVALOS_LIBRES
+        FIN PARA
+
+
+        # -------------------------------------------
+        # 4. FILTRAR POR DURACIÓN DEL SERVICIO
+        #    (asegurar que el turno entra completo)
+        # -------------------------------------------
+
+        intervalos_necesarios = CEIL(duracion_servicio / DURACION_INTERVALO_DIA)
+
+        INTERVALOS_VALIDOS = []
+
+        PARA cada intervalo INICIO_CANDIDATO EN INTERVALOS_LIBRES:
+
+            indice = índice de INICIO_CANDIDATO en INTERVALOS_DEL_DIA
+            puede = VERDADERO
+
+            PARA i DESDE 0 HASTA intervalos_necesarios - 1:
+                SI índice + i se sale de rango:
+                    puede = FALSO
+                    ROMPER
+
+                SI INTERVALOS_DEL_DIA[indice + i] NO está en INTERVALOS_LIBRES:
+                    puede = FALSO
+                    ROMPER
+            FIN PARA
+
+            SI puede == VERDADERO:
+                AGREGAR INICIO_CANDIDATO A INTERVALOS_VALIDOS
+
+        FIN PARA
+
+
+        RETORNAR INTERVALOS_VALIDOS
+    FIN FUNCION
     """
+
+
 
     def get(self, request, id_servicio: int, fecha_solicitada: str, *args, **kwargs):
         usuario = request.user
 
         if not usuario.es_emprendedor:
             return JsonResponse({"error": "El usuario no es emprendedor"}, status=403)
-        
+
         try:
-            fecha_dt = datetime.strptime(fecha_solicitada, "%Y-%m-%d").date()
+            fecha_dt = make_aware(datetime.strptime(fecha_solicitada, "%Y-%m-%d")).date()
             servicio = Servicio.objects.get(pk = id_servicio)
         except ValueError:
             return JsonResponse({"error": "Fecha inválida"}, status=400)
         except ObjectDoesNotExist:
             return JsonResponse({"error": "Servicio inexistente"}, status=400)
 
+        #* -------------------------------- Generar todos los intervalos --------------------
 
-        horarios = Horario.objects.filter(emprendedor = usuario.emprendimiento)
+        horarios = Horario.objects.filter(emprendedor = usuario.emprendimiento, dia_semana=fecha_dt.weekday())
+        if not horarios:
+            return JsonResponse({"error": "No hay horarios para el día seleccioando"}, status=400)
 
-        respuesta = list({ h.dia_semana for h in horarios })
+        intervalos_del_dia = []
+        duracion_intervalo_dia = horarios[0].intervalo
 
-        return JsonResponse({"dias_trabajados": respuesta}, safe=False)
-    
+        for horario in horarios:
+            # Se tienen que combinar con la fecha para hacerlos datetime, porque 
+            # no se le puede sumar un timedelta a time.
+            # Se lo tiene que hacer aware también porque el servidor guarda como UTC-3
+            # Si no se lo tiene en cuenta, se desfasa la hora. (te muestra que el turno es a las 11 en vez de a las 8)
 
-# El algoritmo debería ser algo como
-# traer todos los turnos de ese día, y generar un array, donde cada elemento representa un intervalo de tiempo de ese día
-# segun el turno, se ponga un 1 si el horario está ocupado, 0 si no. Aca hay fragmentacion interna pero no hay con que darle
-# despues, hacer un array nuevo con el nuevo turno solamente, de la misma longitud que el array anterior,
-# si se hace el AND y el array resultante tiene por lo menos un 1, entonces se chocan. Si no, no
-# algo como:
-# ocupados =   [1, 1, 0, 0, 1, 0, 1, 0]
-# nuevo    =   [0, 1, 1, 0, 0, 0, 0, 0]
-# resultado =  [0, 1, 0, 0, 0, 0, 0, 0] -> Se chocan en el segundo intervalo, no se puede sacar turno
-# o, también se puede copiar y pegar el codigo de horarios porque es literalmente lo mismo, no me la contés
+            hora_actual = make_aware(datetime.combine(fecha_dt, horario.inicio))
+            fin_dt = make_aware(datetime.combine(fecha_dt, horario.fin))
+            while hora_actual + timedelta(minutes=horario.intervalo) <= fin_dt:
+                intervalos_del_dia.append(hora_actual.time())
+                hora_actual += timedelta(minutes=horario.intervalo)
+
+        #* -------------------------------- Marcar intervalos ocupados ----------------------
+        intervalos_ocupados = set()
+        turnos_del_dia = Turno.objects.filter(emprendedor=usuario.emprendimiento, inicio__date = fecha_dt)
+        # Como se pueden tener muchos turnos, es mas rapido pasarlos a un dccionario
+        # para encontrar mas rapido el indice al que pertenecen
+        mapa_indices = { hora: indice for indice, hora in enumerate(intervalos_del_dia) }
+
+
+        for turno in turnos_del_dia:
+            hora_inicio_turno = localtime(turno.inicio).time()
+            try:
+                indice = mapa_indices[hora_inicio_turno]
+            except KeyError:
+                # Esto pasa porque el emprendedor modificó un horario que tenía turnos, hay que ignorarlo nomas
+                continue
+
+            cantidad_intervalos = ceil(turno.servicio.duracion / duracion_intervalo_dia)
+
+            for i in range(cantidad_intervalos):
+                if indice + i < len(intervalos_del_dia):
+                    #Esto no debería pasar nunca, porque en teoría
+                    # no puede existir un turno cuyo intervalo caiga fuera de la hora
+                    # de trabajo, porque no se podría haber sacado en un primer momento
+                    intervalos_ocupados.add(intervalos_del_dia[indice + i])
+
+        #* --------------------------------- Obtener intervalos libres ---------------------
+        intervalos_libres = []
+        for intervalo in intervalos_del_dia:
+            if intervalo not in intervalos_ocupados:
+                intervalos_libres.append(intervalo)
+
+        #* -------------------------------- Filtrar por duración del servicio ---------------
+
+        intervalos_necesarios = ceil(servicio.duracion / duracion_intervalo_dia)
+        intervalos_validos = []
+
+        for inicio_candidato in intervalos_libres:
+            indice = mapa_indices[inicio_candidato]
+            valido = True
+
+            for i in range(intervalos_necesarios):
+
+                if indice + i >= len(intervalos_del_dia):
+                    # Se intentó acceder a un intervalo que no existe, imposible que 
+                    # se pueda sacar turno
+                    valido = False
+                    break
+
+                if intervalos_del_dia[indice + i] not in intervalos_libres:
+                    # El turno ocupa intervalos que no están disponibles,
+                    # no se puede sacar turno
+                    valido = False
+                    break
+
+            if valido:
+                intervalos_validos.append(inicio_candidato.strftime("%H:%M"))
+
+        return JsonResponse({"horarios_disponibles": intervalos_validos}, safe=False)
+

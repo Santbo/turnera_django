@@ -99,7 +99,7 @@
               <ul class="py-1 text-sm">
 
                 <li>
-                  {% comment %} #TODO: Poner url de reservar turno {% endcomment %}
+                  {% comment %} #TODO: Poner url de reservar turno como cliente, porque el emprendedor siempre puede desde su perfil nomas {% endcomment %}
                   <a href="" class="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-sky-600">
                     <i class="fa-solid fa-calendar-check"></i>
                     <span>Reservar</span>
@@ -107,8 +107,8 @@
                 </li>
 
                 <li>
-                  {% comment %} #TODO: Poner url de turnos {% endcomment %}
-                  <a href="" class="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-sky-600">
+                  {% comment %} #TODO: Poner url de turnos como cliente {% endcomment %}
+                  <a href="{% if user.es_emprendedor %} {% url 'turnos:turnos_emprendedor'%} {% endif %}" class="flex items-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-sky-600">
                     <i class="fa-solid fa-list-check"></i>
                     <span>Turnos</span>
                   </a>

@@ -158,6 +158,76 @@
           </div>
         </section>
 
+        {% comment %} Horarios disponibles {% endcomment %}
+        <section class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col">
+          <h3 class="text-sm font-semibold text-slate-900 mb-2">3) Horario</h3>
+
+          <p class="mt-2 text-xs text-slate-500 mb-4">
+            Seleccioná un horario para el turno.
+          </p>
+
+          <div id="listado-horarios" class="max-h-64 overflow-y-auto space-y-2">
+          </div>
+        </section>
+
+        {% comment %} Sección final {% endcomment %}
+        <section class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col">
+          <h3 class="text-sm font-semibold text-slate-900 mb-2">4) Confirmar</h3>
+
+          <div class="grow min-h-0 space-y-2">
+
+            {% comment %} texto que cambia si faltan datos {% endcomment %}
+            <p id="texto-confirmacion" class="text-sm text-slate-600">
+              Completá los pasos para confirmar.
+            </p>
+
+            {% comment %} Nombre del cliente {% endcomment %}
+            <div>
+              <label class="block text-xs font-semibold text-sky-700 mb-1">Cliente (opcional)</label>
+              <input
+                id="input-cliente"
+                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none focus:ring-2 focus:ring-sky-300"
+                placeholder="Ingresa un nombre"
+                required
+              />
+            </div>
+
+            {% comment %} Nota opcional {% endcomment %}
+            <div>
+              <label class="block text-xs font-semibold text-sky-700 mb-1">Nota (opcional)</label>
+              <input
+                id="input-nota"
+                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none focus:ring-2 focus:ring-sky-300"
+                placeholder="Referencia breve"
+                maxlength="220"
+              />
+            </div>
+
+          </div>
+
+          {% comment %} Botones {% endcomment %}
+          <div class="pt-2 flex items-center justify-end gap-2">
+
+            <button
+              id="btn-cancelar"
+              class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
+              onclick="cerrarModalTurnos()"
+            >
+              Cancelar
+            </button>
+
+            <button
+              id="btn-confirmar"
+              class="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+              onclick="handleSubmit()"
+              disabled
+            >
+              Crear
+            </button>
+
+          </div>
+        </section>
+
       </div>
     </form>
 
@@ -417,6 +487,7 @@
     }
   }
 
+  // TODO: Hacer que se limpien los campos del formulario
   const cerrarModalTurnos = () => {
     document.getElementById("modal-turnos").classList.add("hidden");
     // {% comment %} Esto se tiene que hacer para que no se mueva la pagina de atras cuando se hace scroll en el modal {% endcomment %}
@@ -436,12 +507,12 @@
           return diasQueTrabaja.includes((fecha.getDay() - 1) % 6);
         }
       ],
-      onChange: function() {iniciarServicios()},
+      onChange: function() {limpiarHorarios(); iniciarServicios();},
     });
   }
 
   const iniciarServicios = () => {
-    const contenedor = document.getElementById("listado-servicios");
+     const contenedor = document.getElementById("listado-servicios");
 
     // {% comment %} Hay que remover todos los elementos cada vez porue si no se duplican {% endcomment %}
 
@@ -473,6 +544,30 @@
     });
   }
 
+  const limpiarHorarios = () => {
+    const contenedor = document.getElementById("listado-horarios");
+    while (contenedor.firstChild) {contenedor.removeChild(contenedor.lastChild);}
+  }
+
+  const iniciarHorarios = (horarios) => {
+    const contenedor = document.getElementById("listado-horarios");
+
+    limpiarHorarios();
+
+    horarios.forEach(h => {
+
+      const wrapper = document.createElement("label");
+      wrapper.className = "flex items-center gap-4 p-2 rounded cursor-pointer hover:bg-slate-50";
+
+      wrapper.innerHTML = `
+        <input type="radio" name="horario" value="${h}" class="hidden peer">
+        <p class="w-full h-full flex items-center gap-2 px-2 py-1 -m-2 rounded peer-checked:border peer-checked:border-sky-700">${h}</p>
+      `;
+
+      contenedor.appendChild(wrapper);
+    });
+  }
+
   {% comment %} la logica depende de si se está editanto o no. 
     eso va a cambiar hacia dónde se hace el post, y si se hace o no un get para obtener los datos
     del turno
@@ -481,11 +576,6 @@
     // {% comment %} Esto se tiene que hacer para que no se mueva la pagina de atras cuando se hace scroll en el modal {% endcomment %}
     document.body.style.overflow = "hidden";
     const tituloModal = document.getElementById("modal-titulo");
-
-    console.log(diasQueTrabaja);
-
-    iniciarDatePicker();
-    // {% comment %} iniciarServicios(); {% endcomment %}
 
     if (idTurno) {
       /* {% comment %} Se está editando un turno, hay que hacer el get de los datos {% endcomment %}
@@ -507,6 +597,9 @@
           {% comment %} 5. Aprobar la materia {% endcomment %}
       */
 
+    iniciarDatePicker();
+
+
     }
     document.getElementById("modal-turnos").classList.remove("hidden");
   }
@@ -515,9 +608,42 @@
     e.preventDefault();
     alert("Se submiteó el form");
   }
+  
+  const cargarHorariosDisponibles = async (idServicio, fechaSolicitada) => {
+      const url = `/turnos/api/horarios/${idServicio}/${fechaSolicitada}/`;
 
-  const handleObtenerHorarios = (idServicio) => {
-    alert( `Servicio seleccionado: ${idServicio}`);
+      try {
+          const resp = await fetch(url, {
+              method: "GET",
+              headers: { "X-Requested-With": "XMLHttpRequest" },
+              cookies: "include"
+          });
+
+          if (!resp.ok) {
+              const errorData = await resp.json().catch(() => ({}));
+              throw new Error(errorData.error || "Error desconocido del servidor");
+          }
+
+          const data = await resp.json();
+
+          if (!data.horarios_disponibles) {
+              throw new Error("Respuesta inesperada del servidor");
+          }
+
+          return data.horarios_disponibles; // array de strings tipo ["09:00", "09:30", ...]
+      } catch (err) {
+          console.error("Error cargando horarios:", err.message);
+          return [];
+      }
+  }
+
+  const handleObtenerHorarios = async (idServicio) => {
+    const fecha = document.getElementById("input-fecha").value;
+
+    if (fecha != null) {
+      const horarios = await cargarHorariosDisponibles(idServicio, fecha);
+      iniciarHorarios(horarios);
+    }
   }
 
   document.addEventListener("DOMContentLoaded", async () => {

@@ -22,7 +22,7 @@ urlpatterns = [
 
     # * ---------------------------------------- Métodos API ------------------------------
     path("api/horarios/", HorariosAPIView.as_view(), name="api_horarios"),
-    path("api/horarios/<int:servicio_id>/<str:fecha>/", HorariosDisponiblesSegunTurnoEmprendedorAPIView.as_view(), name="api_horarios_por_servicio",),
+    path("api/horarios/<int:id_servicio>/<str:fecha_solicitada>/", HorariosDisponiblesSegunTurnoEmprendedorAPIView.as_view(), name="api_horarios_por_servicio",), #! Si esto cambia, hay que cambiar el js del template de turnos
     path("api/servicios/", ServiciosAPIView.as_view(), name="api_servicios"),
     path("api/turnos/emprendedor", TurnosEmprendedorAPIView.as_view(), name="api_turnos_emprendedor"),
     path("api/turnos/emprendedor/diastrabajados", DiasQueTrabajaEmprendedorAPIView.as_view(), name="api_diastrabajados_emprendedor"),
