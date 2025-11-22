@@ -183,8 +183,12 @@ class Turno(models.Model):
     )
 
     def clean(self):
-        if self.fin <= self.inicio:
-            raise ValidationError("La fecha y hora de fin debe ser posterior a la de inicio.")
+        # Esto se tiene que hacer así, porque pueden llegar a ser nulos cuando el formulario de la vista de creación lo valida.
+        # El método form_valid de la vista llama al método clean() del modelo primero, entonces nunca va a tener 
+        if self.inicio and self.fin:
+                if self.fin <= self.inicio:
+                    raise ValidationError("La fecha y hora de fin debe ser posterior a la de inicio.")
+
 
         # Si no lo sacó un cliente, entonces se tiene que tener un nombre del cliente
         if not self.cliente and not self.cliente_nombre:

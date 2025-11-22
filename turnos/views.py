@@ -509,3 +509,80 @@ class HorariosDisponiblesSegunTurnoEmprendedorAPIView(View):
 
         return JsonResponse({"horarios_disponibles": intervalos_validos}, safe=False)
 
+class TurnoEmprendedorCreateView(CreateView):
+    """
+    Vista que crea turnos, utilizada para el panel del emprendedor.
+    """
+    model = Turno
+    fields = [
+        "servicio",
+        "cliente_nombre",
+        "cliente_contacto",
+        "nota",
+        # Estos son los unicos campos del modelo, fecha y hora hay que cambiarlos
+        # antes de guardarlos
+    ]
+    template_name = "turnos_emprendedor.html"
+    success_url = reverse_lazy("turnos:turnos_emprendedor")
+
+    def form_valid(self, form):
+        usuario = self.request.user
+
+        # 1) El emprendedor viene del mismo usuario
+        form.instance.emprendedor = usuario.emprendimiento
+
+        # 2) Estos dos no se pueden tomar del form, se tienen que tomar del post nomas
+        fecha_str = self.request.POST.get("fecha")      # YYYY-MM-DD
+        hora_str = self.request.POST.get("hora")        # HH:MM
+
+        # 3) Combinar fecha + hora en datetime y hacer aware porque si no se guarda como quiere
+        dt_inicio = make_aware(datetime.strptime(f"{fecha_str} {hora_str}", "%Y-%m-%d %H:%M"))
+        form.instance.inicio = dt_inicio
+
+        # 5) Calcular el fin según la duración del servicio
+        servicio = form.cleaned_data["servicio"]
+        duracion = timedelta(minutes=servicio.duracion)
+
+        form.instance.fin = dt_inicio + duracion
+
+        return super().form_valid(form)
+
+
+class TurnoEmprendedorUpdateView(UpdateView):
+    """
+    Vista que edita turnos, utilizada para el panel del emprendedor.
+    """
+    model = Turno
+    fields = [
+        "servicio",
+        "cliente_nombre",
+        "cliente_contacto",
+        "nota",
+    ]
+    template_name = "turnos_emprendedor.html"
+    success_url = reverse_lazy("turnos:turnos_emprendedor")
+
+    def get_queryset(self):
+        """
+        Un emprendedor solo puede editar sus turnos
+        """
+        usuario = self.request.user
+        return Turno.objects.filter(emprendedor=usuario.emprendimiento)
+
+    def form_valid(self, form):
+        usuario = self.request.user
+
+        # 2) Fecha y hora vienen desde inputs del formulario
+        fecha_str = self.request.POST.get("fecha")      # YYYY-MM-DD
+        hora_str = self.request.POST.get("hora")        # HH:MM
+
+        # 3) Recombinar fecha + hora igual que en la creación
+        dt_inicio = make_aware(datetime.strptime(f"{fecha_str} {hora_str}", "%Y-%m-%d %H:%M"))
+        form.instance.inicio = dt_inicio
+
+        # 4) Recalcular hora de fin según duración actual del servicio
+        servicio = Servicio.objects.get(pk=form.cleaned_data["servicio"])
+        duracion = timedelta(minutes=servicio.duracion)
+        form.instance.fin = dt_inicio + duracion
+
+        return super().form_valid(form)
