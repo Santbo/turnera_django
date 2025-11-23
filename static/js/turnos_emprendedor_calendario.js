@@ -1,6 +1,5 @@
 var calendar;
 
-// TODO: implementar las vistas de hoy, semana y todo eso  https://fullcalendar.io/docs/buttonText
 document.addEventListener('DOMContentLoaded', function() {
   var calendarEl = document.getElementById('calendar');
   calendar = new FullCalendar.Calendar(calendarEl, {
@@ -18,7 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
         allDaySlot: false,
       }
     },
-    eventClick: function(info) {mostrarModalTurnos(info.event.id)}
+    eventClick: function(info) {
+      mostrarModalTurnos(info.event.id)
+    }
   });
   calendar.render();
 });

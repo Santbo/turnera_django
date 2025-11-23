@@ -11,29 +11,64 @@ from .views import (
     DiasQueTrabajaEmprendedorAPIView,
     HorariosDisponiblesSegunTurnoEmprendedorAPIView,
     TurnoEmprendedorCreateView,
-    TurnoEmprendedorUpdateView
+    TurnoEmprendedorUpdateView,
+    TurnosEmprendedorDeleteAPIView,
 )
 
 app_name = "turnos"
 urlpatterns = [
     path("horarios/", HorariosView.as_view(), name="horarios"),
     path("servicios/", ServicioCreateView.as_view(), name="listado_servicios"),
-    path("servicios/<int:pk>/editar/", ServicioUpdateView.as_view(), name="edicion_servicio",), #! Si esto cambia, hay que cambiar el js del template de servicios
-    path("servicios/<int:pk>/eliminar/", ServicioDeleteView.as_view(), name="eliminar_servicio",), #! Si esto cambia, hay que cambiar el js del template de servicios
-    path("emprendedor/", TemplateView.as_view(template_name="turnos_emprendedor.html"), name="turnos_emprendedor"),
-    path("emprendedor/crear/", TurnoEmprendedorCreateView.as_view(), name="turnos_emprendedor_crear"),
-    path("<int:pk>/editar/", TurnoEmprendedorUpdateView.as_view(), name="turnos_editar"),
+    path(
+        "servicios/<int:pk>/editar/",
+        ServicioUpdateView.as_view(),
+        name="edicion_servicio",
+    ),  #! Si esto cambia, hay que cambiar el js del template de servicios
+    path(
+        "servicios/<int:pk>/eliminar/",
+        ServicioDeleteView.as_view(),
+        name="eliminar_servicio",
+    ),  #! Si esto cambia, hay que cambiar el js del template de servicios
+    path(
+        "emprendedor/",
+        TemplateView.as_view(template_name="turnos_emprendedor.html"),
+        name="turnos_emprendedor",
+    ),
+    path(
+        "emprendedor/crear/",
+        TurnoEmprendedorCreateView.as_view(),
+        name="turnos_emprendedor_crear",
+    ),
+    path(
+        "<int:pk>/editar/", TurnoEmprendedorUpdateView.as_view(), name="turnos_editar"
+    ),
 
     # * ---------------------------------------- Métodos API ------------------------------
     path("api/horarios/", HorariosAPIView.as_view(), name="api_horarios"),
-    path("api/horarios/<int:id_servicio>/<str:fecha_solicitada>/", HorariosDisponiblesSegunTurnoEmprendedorAPIView.as_view(), name="api_horarios_por_servicio",), #! Si esto cambia, hay que cambiar el js del template de turnos
+    path(
+        "api/horarios/<int:id_servicio>/<str:fecha_solicitada>/",
+        HorariosDisponiblesSegunTurnoEmprendedorAPIView.as_view(),
+        name="api_horarios_por_servicio",
+    ),  #! Si esto cambia, hay que cambiar el js del template de turnos
     path(
         "api/horarios/<int:id_servicio>/<str:fecha_solicitada>/<int:id_turno>/",
-         HorariosDisponiblesSegunTurnoEmprendedorAPIView.as_view(),
-         name="api_horarios_por_servicio_con_turno", # Usada para cuando se está editando un turno, hace que la vista excluya el turno actual cuando calcula la disponibilidad horaria.
+        HorariosDisponiblesSegunTurnoEmprendedorAPIView.as_view(),
+        name="api_horarios_por_servicio_con_turno",  # Usada para cuando se está editando un turno, hace que la vista excluya el turno actual cuando calcula la disponibilidad horaria.
     ),
     path("api/servicios/", ServiciosAPIView.as_view(), name="api_servicios"),
-    path("api/turnos/emprendedor/", TurnosEmprendedorAPIView.as_view(), name="api_turnos_emprendedor"),
-    path("api/turnos/emprendedor/diastrabajados/", DiasQueTrabajaEmprendedorAPIView.as_view(), name="api_diastrabajados_emprendedor"),
-
+    path(
+        "api/turnos/emprendedor/",
+        TurnosEmprendedorAPIView.as_view(),
+        name="api_turnos_emprendedor",
+    ),
+    path(
+        "api/turnos/emprendedor/diastrabajados/",
+        DiasQueTrabajaEmprendedorAPIView.as_view(),
+        name="api_diastrabajados_emprendedor",
+    ),
+    path(
+        "api/turnos/<int:pk>/eliminar/",
+        TurnosEmprendedorDeleteAPIView.as_view(),
+        name="turno_eliminar",
+    ),
 ]

@@ -98,7 +98,7 @@
 
 <div
   id="modal-turnos"
-  class="fixed hidden inset-0 z-[90] grid place-items-center bg-slate-900/60 backdrop-blur-sm px-3"
+  class="fixed hidden inset-0 z-[100] grid place-items-center bg-slate-900/60 backdrop-blur-sm px-3"
 >
   <div class="w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl">
 
@@ -131,10 +131,10 @@
 
     <form id="formulario" method="POST" class="p-5">
       {% csrf_token %}
-      <div class="grid grid-cols-4 gap-3 auto-rows-fr">
+      <div class="flex gap-3 divide-x divide-gray-200 auto-rows-fr">
 
         {% comment %} Día {% endcomment %}
-        <section class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col">
+        <section class="bg-white p-3 flex flex-col flex-1">
           <h3 class="text-sm font-semibold text-slate-900 mb-2">1) Día</h3>
           
           <p class="mt-2 text-xs text-slate-500 mb-4">
@@ -151,7 +151,7 @@
         </section>
         
         {% comment %} Servicio {% endcomment %}
-        <section class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col">
+        <section class="bg-white p-3 flex flex-col flex-1">
           <h3 class="text-sm font-semibold text-slate-900 mb-2">2) Servicio</h3>
           
           <p class="mt-2 text-xs text-slate-500 mb-4">
@@ -163,7 +163,7 @@
         </section>
 
         {% comment %} Horarios disponibles {% endcomment %}
-        <section class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col">
+        <section class="bg-white p-3 flex flex-col flex-1">
           <h3 class="text-sm font-semibold text-slate-900 mb-2">3) Horario</h3>
 
           <p class="mt-2 text-xs text-slate-500 mb-4">
@@ -175,7 +175,7 @@
         </section>
 
         {% comment %} Sección final {% endcomment %}
-        <section class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm flex flex-col">
+        <section class="bg-white p-3 flex flex-col flex-1">
           <h3 class="text-sm font-semibold text-slate-900 mb-2">4) Confirmar</h3>
 
           <div class="grow min-h-0 space-y-2">
@@ -229,31 +229,77 @@
           {% comment %} Botones {% endcomment %}
           <div class="pt-2 flex items-center justify-end gap-2">
 
-            <button
-              id="btn-cancelar"
-              class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
-              onclick="cerrarModalTurnos()"
-              type="button"
-            >
-              Cancelar
-            </button>
-
-            <button
-              id="btn-confirmar"
-              type="submit"
-              class="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-            >
-              Crear
-            </button>
+            
 
           </div>
         </section>
 
       </div>
+
+      <div class="flex justify-end items-center gap-4 mt-8">
+        <button
+          id="btn-cancelar"
+          class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 disabled:opacity-60 cursor-pointer"
+          onclick="cerrarModalTurnos()"
+          type="button"
+        >
+          Cancelar
+        </button>
+
+        <button type="button" id="btn-eliminar" class="rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-rose-700 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer">
+          Eliminar
+        </button>
+
+        <button
+          id="btn-confirmar"
+          type="submit"
+          class="rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-sky-700 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+        >
+          Crear
+        </button>
+      </div>
+
     </form>
 
   </div>
 </div>
+
+<div id="modalConfirmacion"
+        class="hidden fixed z-[101] inset-0 bg-black/40 flex items-center justify-center">
+      <div class="bg-white rounded-xl p-6 w-120 shadow-xl">
+        <h2 class="text-lg font-bold text-gray-800 mb-2">¿Eliminar este turno?</h2>
+        <p class="text-sm text-gray-600 mt-1">
+          Está por eliminar el turno:
+        </p>
+        <p class="text-sm text-gray-600 mt-4" id="modal-confirmacion-descripcion">
+        </p>
+        <p class="text-sm text-gray-600 mt-4 text-red-500 font-bold">
+          Esta acción no se puede deshacer.
+        </p>
+        <p class="text-sm text-gray-600 mt-1">
+          ¿Está seguro de que quiere eliminar el servicio?
+        </p>
+
+        <form id="formEliminar" method="POST" class="mt-4">
+          {% csrf_token %}
+          <div class="flex justify-end gap-2">
+            <button
+                type="button"
+                onclick="cerrarModalConfirmacion()"
+                class="px-3 py-2 text-sm rounded-lg border cursor-pointer"
+            >
+              Cancelar
+            </button>
+            <button
+                type="submit"
+                class="px-3 py-2 text-sm rounded-lg bg-rose-600 text-white hover:bg-rose-700 cursor-pointer"
+            >
+              Eliminar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 {% endblock contenido %}
 
 {% block js_final %}
@@ -266,6 +312,7 @@
   const urlCargarHorariosDisponiblesConTurno = "{% url 'turnos:api_horarios_por_servicio_con_turno' id_servicio=0 fecha_solicitada='placeholder' id_turno=9999 %}";
   const urlActionCrear = "{% url 'turnos:turnos_emprendedor_crear' %}";
   const urlActionEditar = "{% url 'turnos:turnos_editar' pk=0 %}";
+  const urlEliminar = "{% url 'turnos:turno_eliminar' pk=0%}";
 
 </script>
 <script type="text/javascript" src="{% static 'js/turnos_emprendedor_calendario.js' %}"></script>

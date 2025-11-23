@@ -76,6 +76,8 @@ const cerrarModalTurnos = () => {
   limpiarServicios();
 }
 
+// Esto es feo, pero es la forma mas facil de evitar que el flatpickr moleste cuando se está editanto el turno.
+var modalEstaEditanto = false;
 var fpFecha;
 /**
  * Inicializar el datepicker, limpia también los horarios
@@ -85,6 +87,7 @@ const iniciarDatePicker = () => {
     altInput: true,
     altFormat: "j \\d\\e F, Y",
     dateFormat: "Y-m-d",
+    allowInput:true, // permitir que funcione el required en el formulario https://stackoverflow.com/a/69646161
     locale: "es",
     enable: [
       function(fecha) {
@@ -92,7 +95,12 @@ const iniciarDatePicker = () => {
         return diasQueTrabaja.includes((fecha.getDay() + 6) % 7);
       }
     ],
-    onChange: function() {limpiarHorarios(); iniciarServicios();}
+    onChange: function() {
+      if (!modalEstaEditanto) {
+        limpiarHorarios();
+        iniciarServicios();
+      }
+    }
   });
 }
 
@@ -176,16 +184,79 @@ const iniciarHorarios = (horarios) => {
   }
 }
 
+async function mostrarModalConfirmacion(idTurno) {
+  // 1) Obtener el turno
+  let objetoTurno;
+  if (!window.turnosEmprendedor || !Array.isArray(window.turnosEmprendedor)) {
+    const turnos = await obtenerTurnosEmprendedor();
+    objetoTurno = turnos.find(t => t.id == idTurno);
+  } else {
+    objetoTurno = window.turnosEmprendedor.find(t => t.id == idTurno);
+  }
+
+  if (!objetoTurno) {
+    console.error("No se encontró el turno con id", idTurno);
+    return;
+  }
+
+  // 2) Armar descripción
+  const inicio = new Date(objetoTurno.turno.inicio);
+  const hora = inicio.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const fecha = inicio.toLocaleDateString();
+
+  const descripcion = `
+    <div class="space-y-2 text-sm text-gray-700 ml-4">
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-gray-900">Servicio:</span>
+        <span class="text-sky-700">${objetoTurno.servicio.nombre}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-gray-900">Cliente:</span>
+        <span class="text-gray-800">${objetoTurno.cliente.nombre}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-gray-900">Fecha:</span>
+        <span class="text-gray-800">${fecha} ${hora}</span>
+      </div>
+    </div>
+  `;
+
+  // 3) Insertar descripción en el modal
+  document.getElementById("modal-confirmacion-descripcion").innerHTML = descripcion;
+
+  // 4) Actualizar action del form
+  const form = document.getElementById("formEliminar");
+  form.action = urlEliminar.replace("0/", `${idTurno}/`);
+
+  // 5) Mostrar modal
+  document.getElementById("modalConfirmacion").classList.remove("hidden");
+}
+
+function cerrarModalConfirmacion() {
+  document.getElementById("modalConfirmacion").classList.add("hidden");
+}
+
 const mostrarModalTurnos = async (idTurno = null) => {
   // {% comment %} Esto se tiene que hacer para que no se mueva la pagina de atras cuando se hace scroll en el modal {% endcomment %}
   document.body.style.overflow = "hidden";
+
   const formulario = document.getElementById("formulario");
   const tituloModal = document.getElementById("modal-titulo");
   const botonConfirmar = document.getElementById("btn-confirmar");
+  const botonEliminar = document.getElementById("btn-eliminar");
+
+  // Establecer el modo de edición del modal, esto es necesario para que el 
+  // flatpickr no dispare los eventos para poblar los servicios y los horarios.
+
+  modalEstaEditanto = idTurno != null;
   
   if (idTurno) {
     tituloModal.innerHTML = "Editar turno";
     botonConfirmar.innerHTML = "Guardar";
+    botonEliminar.onclick = () => {
+      mostrarModalConfirmacion(idTurno);
+    }
+
     formulario.action = urlActionEditar.replace("0", idTurno);
 
     /**
@@ -216,9 +287,6 @@ const mostrarModalTurnos = async (idTurno = null) => {
     const horas = dtInicioTurno.getHours().toString().padStart(2, "0");
     const minutos = dtInicioTurno.getMinutes().toString().padStart(2, "0");
     const horaInicio = `${horas}:${minutos}`;
-    //TODO: Si el turno se sacó en una fecha que ya no se trabaja, el evento select del flatpickr reinicia todo
-    //TODO: Asegurarse de que no se pueda enviar si no se tiene completos los campos
-    //TODO: Si se hace click en un evento de la vista de ver más, no se cierra la vista de ver más.
 
     // Esto siempre se puede hacer porque los servicios van a estar cargados y tienen on_delete cascade
     // asi que no hay que preocuparse por qué hacer si no existe el servicio
@@ -288,6 +356,7 @@ const mostrarModalTurnos = async (idTurno = null) => {
      formulario.action = urlActionCrear;
      tituloModal.innerHTML = "Nuevo turno";
      botonConfirmar.innerHTML = "Crear";
+     botonEliminar.classList.add("hidden");
 
   }
   document.getElementById("modal-turnos").classList.remove("hidden");
