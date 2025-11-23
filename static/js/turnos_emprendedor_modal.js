@@ -257,6 +257,8 @@ const mostrarModalTurnos = async (idTurno = null) => {
       mostrarModalConfirmacion(idTurno);
     }
 
+    //TODO: Hacer que no se puedan editar turnos que ya terminaron.
+
     formulario.action = urlActionEditar.replace("0", idTurno);
 
     /**
